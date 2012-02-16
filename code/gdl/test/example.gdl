@@ -1,0 +1,50 @@
+
+#validator
+#title Valideer het bestaan van een gelijkzijdige driehoek
+> punt A
+> punt B
+
+lijn A B?
+
+> punt C
+
+lijn C A?
+lijn C B?
+
+p: cirkel A B
+q: cirkel B A
+
+C op p?
+C op q?
+
+QED
+
+---
+
+#macro
+#titel Gelijkzijdige driehoek
+#instructie Selecteer twee punten, of een lijn
+
+probeer
+  > punt A
+  #instructie Selecteer het tweede punt
+  > punt B
+  
+  ab: lijn A B
+anders
+  > lijn a
+  
+  A: a_p1
+  B: a_p2
+  
+c1: cirkel A B
+c2: cirkel B A
+
+C: punt c1 c2
+
+ca: lijn C A
+cb: lijn C B
+
+teken C ab ca cb
+
+#einde A B C is nu een driehoek

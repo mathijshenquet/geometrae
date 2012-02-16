@@ -1,0 +1,29 @@
+#gdl_console{
+	position: fixed;
+	bottom: 45px;
+	right: 0;
+	height: 395px;
+	width: 640px;
+	background: #EFEFEF;
+	border-top: 1px solid #CCC;
+	border-left: 1px solid #CCC;
+	border-bottom: 1px solid #CCC;
+	display: none;
+}
+
+#gdl_console_button{
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	height: 45px;
+	width: 45px;
+	background: 7px 7px url('../images/Gear-small.png') no-repeat #EFEFEF;
+	border-top: 1px solid #CCC;
+	border-left: 1px solid #CCC;
+}
+
+#gdl_console_button:hover{
+	box-shadow: inset 0px 0px 16px lightgray;
+	cursor: pointer;
+}
+	
