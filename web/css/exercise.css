@@ -1,0 +1,12 @@
+.euclides.exercise {
+	margin-left: auto;
+	width: 660px !important;
+}
+.description {
+    float: left;
+    width: 275px;
+}
+.description p {
+	text-align: justify;
+	margin-bottom: 10px;
+}

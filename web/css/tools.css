@@ -1,0 +1,27 @@
+#tools {
+	position: absolute;	
+	margin-top: 20px;
+	margin-left: 25px; /* Margin left + 5px */
+}
+#tools ul {
+	clear: left;
+	height: 34px;
+}
+#tools li {
+	height: 32px;
+	width: 32px;
+	margin-bottom: 5px;
+	margin-left: 5px;
+	text-indent: -9999px;
+	border: 1px solid #aaa;
+	border-radius: 4px;
+	background-image: url(../images/tool_background.png);
+	float: left;
+}
+#tools li:hover {
+	cursor: pointer;
+}
+
+#tools .group {
+	margin-top: 10px;
+}

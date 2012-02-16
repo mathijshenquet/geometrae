@@ -9,6 +9,7 @@
 	border-left: 1px solid #CCC;
 	border-bottom: 1px solid #CCC;
 	display: none;
+	box-shadow: 0 0 10px rgba(0,0,0,.2);
 }
 
 #gdl_console_button{
@@ -17,7 +18,7 @@
 	right: 0;
 	height: 45px;
 	width: 45px;
-	background: 7px 7px url('../images/Gear-small.png') no-repeat #EFEFEF;
+	background: 7px 7px url('../images/gear.png') no-repeat #EFEFEF;
 	border-top: 1px solid #CCC;
 	border-left: 1px solid #CCC;
 }

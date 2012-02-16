@@ -3,6 +3,7 @@ parent("./pages/base.php");
 
 asset(-1, 'css', '/web/css/main.css');
 asset(0, 'js', 'http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js');
+asset(1, 'js', '/web/js/main.js');
 
 if(has('title')) set('title', '%s - Geometrae');
 else 			 set('title', 'Geometrae');

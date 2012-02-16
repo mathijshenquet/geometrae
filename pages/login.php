@@ -7,23 +7,23 @@ asset(11, 'js', '/web/js/login.js');
 
 <div class="wrapper">
 	<div id="loginorsignup">
-		<div id="login">
-			<h2>Log in</h2>
-			<h3>Gebruikersnaam</h3>
-			<input type="text" value="Gebruikersnaam"></input>
-			<h3>Wachtwoord</h3>
-			<input type="password" value="Wachtwoord"></input>
+		<form id="login" method="post" action="checklogin.php">
+			<legend>Log in</legend>
+			<label for="username">Gebruikersnaam</label>
+			<input type="text" name="username" value="Gebruikersnaam"></input>
+			<label for="password">Wachtwoord</label>
+			<input type="password" name="password" value="Wachtwoord"></input>
 			<input type="submit" id="login_submit" class="button" value="Inloggen"></input>
-		</div>
-		<div id="register">
-			<h2>Meld je aan</h2>
-			<h3>Gebruikersnaam</h3>
-			<input type="text" value="Gebruikersnaam"></input>
-			<h3>Wachtwoord</h3>
-			<input type="password" value="Wachtwoord"></input>
-			<h3>E-mailadres</h3>
-			<input type="text" value="E-mailadres"></input>
+		</form>
+		<form id="register" method="post" action="createacount.php">
+			<legend>Meld je aan</legend>
+			<label for="username">Gebruikersnaam</label>
+			<input type="text" name="username" value="Gebruikersnaam"></input>
+			<label for="password">Wachtwoord</label>
+			<input type="password" name="password" value="Wachtwoord"></input>
+			<label for="email">E-mailadres</label>
+			<input type="text" name="email" value="E-mailadres"></input>
 			<input type="submit" id="login_submit" class="button" value="Maak mijn account"></input>
-		</div>
+		</form>
 	</div>
 </div>

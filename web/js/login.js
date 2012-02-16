@@ -11,12 +11,10 @@ $(document).ready(function() {
 	$("input[type=text], input[type=password]").blur(function() {
 		if ( $(this).attr("value") == "" ) {
 			$(this).attr("value", $(this).attr("name"));
+			$(this).removeClass("filled");
 		} else {
-			console.log($(this).val());
 			$(this).attr("value", $(this).val());
+			$(this).addClass("filled");
 		}
-	});
-	$("#logo").click(function() {
-		window.location = "./";
 	});
 });
