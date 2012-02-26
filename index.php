@@ -1,8 +1,8 @@
 <?php
 require './site/Framework.php';
 
-asset_root('/geometrae/');
-controller_root('/geometrae/');
+asset_root('/');
+controller_root('/');
 
 routes(array(
 	"homepage"		=> array(
@@ -25,6 +25,14 @@ routes(array(
 		'route'		=> '/qnum',
 		'page' 		=> './pages/test_qnum.php'
 	),
+	"chapters"		=> array(
+		'route'		=> '/chapters',
+		'page'		=> "./pages/chapters.php"
+	),
+	"exercise"		=> array( 
+		'route'		=> '/exercise',
+		'page'		=> "./pages/exercise.php"
+	)
 ));
 
 register_asset("cf", "<script type=\"text/coffeescript\" src=\"%s\"></script>");

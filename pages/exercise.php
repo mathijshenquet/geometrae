@@ -11,37 +11,37 @@ asset(0,  'js', '/web/lib/coffee-script.js');
 asset(1,  'js', '/web/lib/jquery.easing.js');
 asset(1,  'js', '/web/lib/jquery.scrollTo-min.js');
 
-asset(100, 'inline_cf', <<<'INLINE'
+asset(100, 'inline_cf', <<<INLINE
 
 $ ->
-    $canvas = $(".euclides canvas.app")
-    $wrap = $(".euclides")
-    $body = $("body")
+    canvas = $(".euclides canvas.app")
+    wrap = $(".euclides")
+    body = $("body")
     
-    euclides = new EuclidesApp($canvas);
+    euclides = new EuclidesApp(canvas);
 
     resizeCanvas = ->
-        fullscreen = $body.hasClass("fullscreen")
+        fullscreen = body.hasClass("fullscreen")
         
         offset = if fullscreen then 12 else 138 #TODO Beetje 'magic hier'. Beter uitlezen hoe hoog ie moet worden
-        $wrap.height $(window).height() - offset
-        $wrap.width 700
-        $wrap.css "display", "block"
+        wrap.height $(window).height() - offset
+        wrap.width 700
+        wrap.css "display", "block"
         
-        $canvas[0].width = 700;
-        $canvas[0].height = $wrap.height()
+        canvas[0].width = 700;
+        canvas[0].height = wrap.height()
         
-        $canvas.show()
+        canvas.show()
         
         euclides.draw()
         
         $.scrollTo('44px', 0, {easing:'easeOutQuint'}) if fullscreen
         
     $(document).jkey 'f', ->
-        if $body.hasClass "fullscreen"
-            $body.removeClass "fullscreen"
+        if body.hasClass "fullscreen"
+            body.removeClass "fullscreen"
         else
-            $body.addClass "fullscreen"
+            body.addClass "fullscreen"
         resizeCanvas()
     
     resizeCanvas()

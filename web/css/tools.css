@@ -6,13 +6,13 @@
 #tools ul {
 	clear: left;
 	height: 34px;
+	list-style: none;
 }
 #tools li {
 	height: 32px;
 	width: 32px;
 	margin-bottom: 5px;
 	margin-left: 5px;
-	text-indent: -9999px;
 	border: 1px solid #aaa;
 	border-radius: 4px;
 	background-image: url(../images/tool_background.png);

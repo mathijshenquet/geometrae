@@ -1,4 +1,6 @@
 <?php
+if( !defined( __DIR__ ) )define( __DIR__, dirname(__FILE__) );
+
 class Site{
 	private static $instance;
 	
@@ -53,6 +55,12 @@ function render($page){
 }
 
 function handle($uri){
+	if(substr($uri, -1)=='/' && $uri != '/'){
+		header('HTTP/1.1 301 Moved Permanently');
+  		header('Location: /'.trim($uri,'/'));
+  		exit();
+  	}
+
 	$page = Site::get()->router->match($uri);
 	echo render($page);
 }
@@ -251,7 +259,7 @@ class Router{
 		$this->pages[$name]		 = $page;
 	}
 	
-	function match($uri){		
+	function match($uri){
 		$uri = "/".trim($uri, "/");
 
 		foreach($this->matches as $page => $match){
@@ -259,7 +267,7 @@ class Router{
 				foreach($params as $p => $value)
 					if(!is_numeric($p))
 						$_REQUEST[$p] = $value;
-				
+
 				return $this->pages[$page];
 			}
 		}

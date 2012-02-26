@@ -1,46 +1,4 @@
-global.qNum = {} unless qNum?
-
-global.qNumError = class qNumError extends Error
-  constructor: (@message) ->
-    @name = "qNumError"
-
-qNum.debug = (lvl) -> (fn) -> if lvl <= qNum.debug.threshold then fn()
-qNum.debug.basic = qNum.debug(1)
-qNum.debug.extended = qNum.debug(2)
-qNum.debug.log = qNum.debug(3)
-qNum.debug.threshold = 3
-
-qNum.zero = (n) -> switch
-  when n == 0 then new Q 0, 1
-  when n >  0 then new X (z = qNum.zero (n-1)), z.copy()
-  else throw new qNumError "todo"
-  
-qNum.one = (domain) ->
-  one = new Q 1, 1
-  
-  for n in [0...domain]
-    one = new X one, qNum.zero(n)
-    
-  return one
-    
-qNum.extend = (value, domain) ->
-  if typeof value == 'number'
-    value = new Q value, 1
-
-  for n in [(value.depth)...domain]
-    value = new X value, qNum.zero(n)
-    
-  return value
-
-qNum.deconstruct = (number) -> switch number.type
-  when X
-    return false unless number.b == qNum.zero(number.b.depth)
-    return qNum.deconstruct number.a
-  when Q
-    return false unless number.d == 1
-    return number.n
-
-qNum.Pool = class qNumPool
+global.qNum = class qNumPool
   constructor: ->
     @domain        = []
     @numbers       = []
@@ -89,6 +47,46 @@ qNum.Pool = class qNumPool
     if index == -1
       throw new Error "Tried to destroy an calculator that has allready been destroyed!"
     @calculators.splice index, 1
+
+global.qNumError = class qNumError extends Error
+  constructor: (@message) ->
+    @name = "qNumError"
+
+qNum.debug = (lvl) -> (fn) -> if lvl <= qNum.debug.threshold then fn()
+qNum.debug.basic = qNum.debug(1)
+qNum.debug.extended = qNum.debug(2)
+qNum.debug.log = qNum.debug(3)
+qNum.debug.threshold = 3
+
+qNum.zero = (n) -> switch
+  when n == 0 then new Q 0, 1
+  when n >  0 then new X (z = qNum.zero (n-1)), z.copy()
+  else throw new qNumError "todo"
+  
+qNum.one = (domain) ->
+  one = new Q 1, 1
+  
+  for n in [0...domain]
+    one = new X one, qNum.zero(n)
+    
+  return one
+    
+qNum.extend = (value, domain) ->
+  if typeof value == 'number'
+    value = new Q value, 1
+
+  for n in [(value.depth)...domain]
+    value = new X value, qNum.zero(n)
+    
+  return value
+
+qNum.deconstruct = (number) -> switch number.type
+  when X
+    return false unless number.b == qNum.zero(number.b.depth)
+    return qNum.deconstruct number.a
+  when Q
+    return false unless number.d == 1
+    return number.n
 
 qNum.Number = class qNumNumber
   id_pool = 0

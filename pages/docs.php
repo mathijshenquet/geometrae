@@ -14,7 +14,9 @@ ob_start();
 require $file;
 $md = ob_get_clean();
 
-$md = preg_replace_callback("`\(@(.*?)\)`", function($matches){ return "(".link_to('docs', array('page' => $matches[1])).")"; }, $md)
+function f($matches){ return "(".link_to('docs', array('page' => $matches[1])).")"; }
+
+$md = preg_replace_callback("`\(@(.*?)\)`", 'f', $md);
 
 ?>
 

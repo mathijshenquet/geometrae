@@ -1,4 +1,6 @@
 #gdl_console{
+	z-index: 100;
+
 	position: fixed;
 	bottom: 45px;
 	right: 0;
@@ -13,6 +15,8 @@
 }
 
 #gdl_console_button{
+	z-index: 100;
+
 	position: fixed;
 	bottom: 0;
 	right: 0;

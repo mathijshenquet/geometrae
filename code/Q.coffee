@@ -55,3 +55,16 @@ Function::attr = (name, data) ->
             clearTimeout(id);
         };
 }());`
+
+global.feq = (a, b, scale=false, dbg = false) ->
+    d = abs(a - b)
+    
+    if not scale
+        scale = max(abs(a), abs(b))
+
+    l = scale * 1e-12
+
+    if dbg
+        console.log dbg, a, b, d, l
+
+    d <= l

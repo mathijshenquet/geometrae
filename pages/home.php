@@ -8,6 +8,58 @@ asset(100, 'inline_cf', <<<INLINE
 $ ->
     canvas = $(".app")
     euclides = new EuclidesApp(canvas)
+    euclides.selectTool("interact")
+    euclides.toggleHide("toolbar")
+
+    {x, y} = euclides.toCanvasCoords({x: 85, y: 125})
+    a = new FreePoint(x, y)
+
+    {x, y} = euclides.toCanvasCoords({x: 135, y: 55})
+    b = new FreePoint(x, y)
+
+    c1 = new Circle a, b
+    c2 = new Circle b, a
+
+    i1 = new DependentPoint c1, c2, 0
+    i2 = new DependentPoint c1, c2, 1
+
+    l1 = new Line(a, b)
+    l2 = new Line(i1, i2)
+    l3 = new Line(a, i1)
+    l4 = new Line(a, i2)
+    l5 = new Line(b, i1)
+    l6 = new Line(b, i2)
+
+    euclides.attach [a, b, c1, c2, i1, i2, l1, l2, l3, l4, l5, l6]
+
+    {x, y} = euclides.toCanvasCoords({x: 600-135, y: 125})
+    a = new FreePoint(x, y)
+
+    {x, y} = euclides.toCanvasCoords({x: 600-85, y: 55})
+    b = new FreePoint(x, y)
+
+    c = new Circle(a, b)
+    l = new Line(a, b)
+
+    euclides.attach [a, b, c, l]
+
+    {x, y} = euclides.toCanvasCoords({x: 300-75, y: 230})
+    a = new FreePoint(x, y)
+
+    {x, y} = euclides.toCanvasCoords({x: 300+50, y: 185})
+    b = new FreePoint(x, y)
+
+    c1 = new Circle(a, b)
+    c2 = new Circle(b, a)
+    i = new DependentPoint(c1, c2, 1)
+
+    l1 = new Line(a, b)
+    l2 = new Line(a, i)
+    l3 = new Line(i, b)
+
+    c1.hidden = c2.hidden = c1.helper = c2.helper = true
+
+    euclides.attach [a, b, i, l1, l2, l3, c1, c2]
 
 INLINE
 );
@@ -19,7 +71,7 @@ INLINE
 			<h1>Leer geometrie</h1>
 			<p>Geometrae is de makkelijkste manier om geometrie te doen, en leren. Het is interactief, leuk en je kan het met vrienden doen.</p>
 		</div>
-		<canvas class="app preview" width="600" height="400">You really need to update your browser...</canvas>
+		<div class="app preview"></div>
 	</div>
 	<div id="blackbar"></div>
 </div>

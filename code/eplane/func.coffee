@@ -6,6 +6,8 @@ global.HALF_TAU = PI
 global.distance = (a, b) -> sqrt(sq(a.x-b.x)+sq(a.y-b.y))
 global.sq = (a) -> a*a
 
+global.pointsSame = (a, b) -> feq(a.x, b.x) and feq(a.y, b.y)
+
 global.Random =
     int: (min, max) -> floor(Math.random() * (max - min + 1)) + min
     double: (min, max) -> Math.random() * (max  o- min) + min

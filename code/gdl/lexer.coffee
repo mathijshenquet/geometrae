@@ -1,18 +1,3 @@
-# The CoffeeScript Lexer. Uses a series of token-matching regexes to attempt
-# matches against the beginning of the source code. When a match is found,
-# a token is produced, we consume the match, and start again. Tokens are in the
-# form:
-#
-#     [tag, value, lineNumber]
-#
-# Which is a format that can be fed directly into [Jison](http://github.com/zaach/jison).
-
-#if require?
-#    {Rewriter} = require './rewriter'
-
-#    # Import the helpers we need.
-#    {count, starts, compact, last} = require './helpers'
-
 # The Lexer Class
 # ---------------
 

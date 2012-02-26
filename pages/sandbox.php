@@ -14,25 +14,19 @@ asset(1,  'js', '/web/lib/jquery.scrollTo-min.js');
 asset(100, 'inline_cf', <<<INLINE
 
 $ ->
-    canvas = $(".euclides canvas.app")
-    wrap = $(".euclides")
     body = $("body")
     
-    euclides = new EuclidesApp(canvas);
+    euclides = new EuclidesApp($(".euclides"));
     makeGDLConsole(euclides)
 
     resizeCanvas = ->
         fullscreen = body.hasClass("fullscreen")
         
-        offset = if fullscreen then 12 else 138 #TODO Beetje 'magic hier'. Beter uitlezen hoe hoog ie moet worden
-        wrap.height $(window).height() - offset
-        wrap.css "display", "block"
-        
-        canvas[0].width = wrap.width()
-        canvas[0].height = wrap.height()
-        
-        canvas.show()
-        
+        offset = if fullscreen then 12 else 46+1+50 #TODO Beetje 'magic' hier. Beter uitlezen hoe hoog ie moet worden
+        euclides.element.height (height = $(window).height() - offset)
+        euclides.element.css "display", "block"
+
+        euclides.resize()
         euclides.draw()
         
         $.scrollTo('44px', 0, {easing:'easeOutQuint'}) if fullscreen
@@ -55,5 +49,4 @@ INLINE
 <?= render('./pages/_gdl_console.php') ?>
 
 <div class="euclides sandbox">
-	<canvas class="app">You really need to update your browser...</canvas>
 </div>

@@ -1,50 +1,75 @@
 
 class Gui
     constructor: (@space) ->
-        @elements = [ new Listing(@space, {left: 0, right: 0, top: 40, bottom: 0})
-                    , new Toolbar(@space, {left: 0, right: 0, top: 0 , bottom: 0})]
+        @listing = new Listing(@space, {left: 0, right: 0, top: 40, bottom: 0})
+        @toolbar = new Toolbar(@space)
         
     draw: (ctx) ->
-        for e in @elements
-            e.draw(ctx)
+        @listing.draw(ctx)
+
+    toggleHide: (name) -> @[name].toggleHide() if @[name]
 
 class Toolbar
-    constructor: (@space, @box) ->
+    constructor: (@space) ->
+        @element = $("<div id=tools style=z-index:10>")
+        @space.element.append @element
+
+        @hidden = false
+
+        for group in Settings.toolbar
+            for tool in group
+                do (tool) =>
+                    if (isRootTool = tool.tool[0] == '!')
+                        tool.id = tool.tool[1..]
+                        tool.fn = => @space.selectTool tool.id
+                    else
+                        tool.id = tool.tool
+                        tool.fn = => @space.selectTool 'construct', Constructions[tool.id]
+
+            @addGroup group
+
+    toggleHide: ->
+        @hidden = not @hidden
+        @element.hide()
     
-    draw: (ctx) ->
-        #@drawBox(ctx, {x: 0, y: 0, w: 36, h: 36})
-    
-        for tool in @space.tools
-            selected = tool == @space.tool
-            
-    drawBox: (ctx, {x, y, w, h}) ->
-        br = 5 # border radius
-        r = x + w
-        b = y + h
-        l = x
-        t = y
-        
-        ctx.strokeStyle = "#ccc"
-        
-        ctx.translate(0.5, 0.5)
-        
-        ctx.beginPath()
-        
-        ctx.moveTo(l+br, t)
-        ctx.arcTo(r, t, r, b, br)
-        ctx.arcTo(r, b, l, b, br)
-        ctx.arcTo(l, b, l, t, br)
-        ctx.arcTo(l, t, r, t, br)
-        
-        ctx.stroke()
-        
-        ctx.translate(-0.5, -0.5)
+    addGroup: (tools) ->
+        group_element = $("<ul id=#{name}>")
+        @element.append group_element
+
+        tools.forEach (tool) ->
+            tool_element = $("<li class=tool_#{tool.id} title=\"#{tool.name}\"></li>")
+
+            icon = $('<canvas width=32 height=32>')
+            tool_element.append icon
+
+            ctx = icon[0].getContext('2d')
+            box = { scale: 32 }
+            tool.icon(ctx, box) if tool.icon
+
+            tool_element.mousedown (e) -> return false
+
+            tool_element.mouseup (e) -> return false
+
+            tool_element.click (e) ->
+                tool.fn()
+                e.stopPropagation()
+                return false
+
+            tool_element.fadeTo(0, 0.5)
+
+            tool_element.hover (->
+                    tool_element.stop().fadeTo(100, 0.9)
+                ), (->
+                    tool_element.stop().fadeTo(500, 0.618)
+                )
+
+            group_element.append tool_element
 
 class Listing
     constructor: (@space, @box) ->
 
     draw: (ctx) ->
-        #return null if EuclidesApp.listing == false
+        #return null if @listing == false
     
         box = {}
         for side of @box

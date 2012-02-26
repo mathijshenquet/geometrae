@@ -3,14 +3,20 @@
 class Entity
     id_pool = 0
   
-    @attr "visible" # Visibility is wheter the element is to be drawn
+    @attr "visible" # Visibility is wether the element is to be drawn
         get: -> not @virtual and not @hidden and not @destroyed
-        
+
+    @attr "needsUpdate"
+        get: -> not @valid
+
+    @attr "destroyed"
+        get: -> @destroy_count > 0
+
     @unique: `function(arr) {
         var hash = {}, result = [];
         for ( var i = 0, l = arr.length; i < l; ++i ) {
-            if ( !hash.hasOwnProperty(arr[i].id) ) { //it works with objects! in FF, at least
-                hash[ arr[i].entity_id ] = true;
+            if ( !hash.hasOwnProperty(arr[i].id) ) {
+                hash[ arr[i].id ] = true;
                 result.push(arr[i]);
             }
         }
@@ -19,23 +25,21 @@ class Entity
     
     # We initialize objects to set properies that are to be used by the instances of entity.
     initialize: (parents=[]) ->
-        throw new Error "Allready initialized" if @finalized? and @finalized == true
-
         # Hierachy        
         @children = []
         @parents = []
         for parent in parents
           @parents.push parent
-          parent.addChild this
           
         @dependingObjects = []
         @ancestors        = @calculateAncestors()
         @roots            = @calculateRoots()
-        
+
         # Logical state
-        @valid      = false
-        @destroyed  = false
-        @virtual    = false
+        @valid         = false
+        @destroy_count = 1
+        @virtual       = false
+        @helper        = false
         
         # Misc state, used by the drawing engine
         @hidden     = false
@@ -45,17 +49,29 @@ class Entity
         @name = null
         
         @id = id_pool++
-        
+
+        @undestroy()
+    
+    undestroy: ->
+        dep.destroy_count-- for dep in @dependingObjects if @dependingObjects?
+        @destroy_count--
+
+        if not @destroyed
+            for parent in @parents
+                parent.addChild this
+
+            for ancestor in @ancestors
+                ancestor.addDep this
+
     destroy: ->
-        if @parents?
-          p.removeChild this for p in @parents
-          @parents = []
-        
-        if @children?
-          child.destroy() for child in @children
-          @children = []
-            
-        @destroyed = true
+        for parent in @parents
+            parent.removeChild this
+
+        for ancestor in @ancestors
+            ancestor.removeDep this 
+
+        dep.destroy_count++ for dep in @dependingObjects if @dependingObjects?
+        @destroy_count++
     
     addChild: (c) ->
         if @destroyed
@@ -63,19 +79,17 @@ class Entity
           return false
       
         @children.push c
-        @dependingObjects.push c
-        for object in @ancestors
-          object.dependingObjects.push c
     
-    removeChild: (t) -> @children = @children.filter (c) -> c != t
+    removeChild: (t) -> @children = @children.filter (c) -> c.id != t.id
     
+    addDep: (dep)    -> @dependingObjects.push dep
+
+    removeDep: (dep) -> @dependingObjects = @dependingObjects.filter (o) -> o.id != dep.id
+
     # Invalidate the entity, forcing recalculation when necessary
     invalidate: ->
-        @valid = false
-        
-        depending_objects = @calculateDependingObjects()
-        for depending_object in depending_objects
-            depending_object.valid = false
+        object.valid = false for object in @dependingObjects
+        @valid = false    
 
     # Forces calculation on the called object. After this function is called the object has to be in proper valid state.
     forceCalculate: ->    
@@ -124,13 +138,12 @@ class Entity
         reduced_roots
     
     calculateAncestors: ->
-      ancestors = []
-      ancestors = ancestors.concat @parents # our parents are ancestors
-      ancestors = ancestors.concat parent.ancestors for parent in @parents # the ancestors of our parents are ancestors
-      ancestors = Entity.unique ancestors # now filter out duplicate entities
-      return ancestors
-    
-    calculateDependingObjects: -> @dependingObjects
+        ancestors = []
+        ancestors = ancestors.concat @parents # our parents are ancestors
+        ancestors = ancestors.concat parent.ancestors for parent in @parents # the ancestors of our parents are ancestors
+        ancestors = Entity.unique ancestors # now filter out duplicate entities
+
+        return ancestors
     
     sameRoots: (other) ->
         return false if this.roots.length != other.roots.length
@@ -151,34 +164,37 @@ class Entity
         
         return true
 
-class BasePoint extends Entity
+class Point extends Entity
     hits: (obj) -> distance(obj, this) < Settings.point.hit_radius
     
     laysOn: (obj) ->
         switch
-            when obj instanceof Circle
-                return (obj.r - sml) < distance(this, obj) < (obj.r + sml)
+            when obj instanceof Circle then feq(distance(obj, this), obj.r)
             when obj instanceof Line
-                c1 = 0.99 < dydx(obj.p1, this)/obj.rc < 1.01
-                c2 = 0.99 < dydx(obj.p2, this)/obj.rc < 1.01
-            
-                return c1 or c2
-            else
-                console.log a
-                throw new Error("Invalid argument to Point.laysOn | #{a}")
+                c1 = 0.99 < (a = dydx(obj.p1, this))/(b = obj.rc) < 1.01 or
+                     (a == 0 == b and feq(obj.p1.y, @y)) or
+                     (abs(a) == Infinity == abs(b) and feq(obj.p1.x, @x))
+                
+                c2 = 0.99 < (a = dydx(obj.p2, this))/(b = obj.rc) < 1.01 or 
+                     (a == 0 == b and feq(obj.p2.y, @y)) or
+                     (abs(a) == Infinity == abs(b) and feq(obj.p2.x, @x))
 
-class Point extends BasePoint
+                return c1 or c2
+            else throw new Error("Invalid argument to Point.laysOn | #{a}")
+
+class DependentPoint extends Point
     constructor: (@o1, @o2, @i) ->
         @initialize([o1, o2])
         @destroy() if @o1 == @o2
         @method = Intersection.method(@o1, @o2)
+        @hidden = @o1.hidden or @o2.hidden
         
     calculate: ->      
-        {@x, @y, @virtual} = @method(@o1, @o2, @i)
+        {@x, @y, @virtual} = @method(@i)
     
     free: false
 
-class FreePoint extends BasePoint
+class FreePoint extends Point
     @attr "x",
         set: (v) ->
             @_x = v
@@ -249,4 +265,4 @@ class Circle extends Entity
         @r = distance(@p1, @p2)
         @angle = atan2(@p2.y-@p1.y, @p2.x-@p1.x)
 
-globalize {Point, FreePoint, Circle, Line}
+globalize {Point, DependentPoint, FreePoint, Circle, Line}

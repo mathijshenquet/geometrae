@@ -1,52 +1,37 @@
 
 magic_circle = (ctx, x, y, r) ->
-  m = 0.551784
-
   ctx.save()
   ctx.translate(x, y)
   ctx.scale(r, r)
-  ctx.moveTo(1, 0)
-  ctx.bezierCurveTo(1,  -m,  m, -1,  0, -1)
-  ctx.bezierCurveTo(-m, -1, -1, -m, -1,  0)
-  ctx.bezierCurveTo(-1,  m, -m,  1,  0,  1)
-  ctx.bezierCurveTo( m,  1,  1,  m,  1,  0)
-  ctx.closePath()
-  ctx.restore()
 
-Settings =
-    point:
-        draw_radius: 2.5
-        hit_radius:  10
-        label_distance: 17
-        create_distance: 6 # de afstand waarna de engine overgaat in selecte ipv puntmaken
-        
-    select:
-        segment_length: 5
-        segment_jmp: 33
-        
-    label:
-        dx: 10
-        dy: 0
-        d: 7.5
-        font_size: 11
-        
-    listing:
-        x: 5
-        y: 5
-        font_size: 12
-        line_height: 1.33
-        
-    scale: 10
-    
-    color:
-        light1: "#e0e0e0"
-        light2: "#c0c0c0"
+  m = 0.2652031
+  r = TAU / 8
+  isq = 1/sqrt(2)
+
+  f = -> ctx.bezierCurveTo m, 1, (1-m)*isq, (1+m)*isq, isq, isq
+
+  ctx.moveTo(0, 1)
+  for i in [0...8]
+    ctx.lineTo(-.0001, 1)
+    ctx.lineTo(+.0001, 1)
+    f()
+    ctx.rotate(-r)
+
+  #ctx.closePath()
+  ctx.restore()
     
 Show =
     coords: ({x, y}) -> "(#{(x/Settings.scale).toFixed(1)},#{(y/Settings.scale).toFixed(1)})"
 
 Draw =
+  magic: (ctx, space, thing) -> switch
+    when thing instanceof Point  then Draw.point  ctx, space, thing
+    when thing instanceof Line   then Draw.line   ctx, space, thing
+    when thing instanceof Circle then Draw.circle ctx, space, thing
+
   point: (ctx, space, p) ->
+    space = {box: space} if space.scale?
+
     ctx.beginPath()
     ctx.fillStyle = "#006cff"
     ctx.arc(p.x * space.box.scale, p.y * space.box.scale, Settings.point.draw_radius, 0, TAU, true)
@@ -57,10 +42,10 @@ Draw =
     culledPs = []
     gridMap = {}
     ps = ps.filter (p) ->
-      x  = round p.x
-      y  = round p.y
+      x  = round (p.x * space.box.scale)
+      y  = round (p.y * space.box.scale)
 
-      if gridMap[x]? and gridMap[x][y]? and gridMap[x][y].some ((other) -> distance(p, other) < sml)
+      if gridMap[x]? and gridMap[x][y]?
         return false 
       else
         gridMap[x]  ?= {}
@@ -83,7 +68,7 @@ Draw =
     ctx.beginPath()
     ctx.lineWidth = 1
     dp.filter((p) -> p.hover).forEach (p) ->
-      ctx.arc(p.x * space.box.scale, p.y * space.box.scale, Settings.point.hit_radius, 0, TAU, true)
+      ctx.arc(p.x * space.box.scale, p.y * space.box.scale, Settings.point.hover_draw_radius, 0, TAU, true)
       ctx.closePath()
     ctx.stroke()
 
@@ -102,17 +87,17 @@ Draw =
     ctx.beginPath()
     ctx.lineWidth = 1
     fp.filter((p) -> p.hover).forEach (p) ->
-      ctx.arc(p.x * space.box.scale, p.y * space.box.scale, Settings.point.hit_radius, 0, TAU, true)
+      ctx.arc(p.x * space.box.scale, p.y * space.box.scale, Settings.point.hover_draw_radius, 0, TAU, true)
       ctx.closePath()
     ctx.stroke()
     
     # draw labels
-    if EuclidesApp.labels
+    if space.labels
       ctx.fillStyle = "#000"
       ctx.font = "#{Settings.label.font_size}px sans-serif"
       ctx.textBaseline = "middle"
       ctx.textAlign = "center"
-      ps.filter((point) -> point.name?).forEach (p) ->
+      ps.filter((point) -> point.name).forEach (p) ->
         if p.name
           ctx.fillText p.name, p.x * space.box.scale + Settings.point.label_distance, p.y * space.box.scale
   
@@ -129,6 +114,8 @@ Draw =
           ctx.lineTo(box.right, l.rc * box.right + l.hc * box.scale)
   
   line: (ctx, space, l) ->
+    space = {box: space} if space.scale?
+
     ctx.strokeStyle = "#666"
     ctx.beginPath()
     Draw.rawLine ctx, l, space.box
@@ -150,12 +137,12 @@ Draw =
     ctx.stroke()
     
     # draw labels
-    if EuclidesApp.labels
+    if space.labels
       ctx.fillStyle = "#000"
       ctx.font = "#{Settings.label.font_size}px sans-serif"
       ctx.textBaseline = "middle"
       ctx.textAlign = "center"
-      ls.filter((o) -> o.name?).forEach (l) ->
+      ls.filter((o) -> o.name).forEach (l) ->
         lx = l.x1 + (l.x2 - l.x1)*0.382
         ly = l.y1 + (l.y2 - l.y1)*0.382
         c = Settings.label.d/(l.length * space.box.scale)
@@ -184,11 +171,11 @@ Draw =
     cs.filter((o) -> o.selected).forEach     (c) -> magic_circle(ctx, c.x * space.box.scale, c.y * space.box.scale, c.r * space.box.scale)
     ctx.stroke()
     
-    if EuclidesApp.labels
+    if space.labels
       ctx.font = "#{Settings.label.font_size}px sans-serif"
       ctx.textBaseline = "middle"
       ctx.textAlign = "center"
-      cs.filter((o) -> o.name?).forEach (c) ->
+      cs.filter((o) -> o.name).forEach (c) ->
         dx = (c.x - c.p2.x)
         dy = (c.y - c.p2.y)
         d = sqrt(sq(dx)+sq(dy)) * space.box.scale + Settings.label.d
@@ -200,68 +187,86 @@ Draw =
         ctx.fillText c.name, lx, ly
         
   selectionLine: (ctx, space, ps, mouse) ->
+        return null if ps.length < 2
+
         ctx.strokeStyle = "#66F"
         ctx.lineWidth = 1
-    
+
         ctx.beginPath()
         ctx.moveTo(ps[0].x * space.box.scale, ps[0].y * space.box.scale)
     
-        if ps.length < 2
-        else
-            for i in [1...(ps.length-1)]
-                xc = (ps[i].x + ps[i+1].x) / 2
-                yc = (ps[i].y + ps[i+1].y) / 2
-                
-                ctx.quadraticCurveTo(ps[i].x * space.box.scale, ps[i].y * space.box.scale, xc * space.box.scale, yc * space.box.scale);
-        
+        for i in [1...(ps.length-1)]
+            xc = (ps[i].x + ps[i+1].x) / 2
+            yc = (ps[i].y + ps[i+1].y) / 2
+            
+            ctx.quadraticCurveTo(ps[i].x * space.box.scale, ps[i].y * space.box.scale, xc * space.box.scale, yc * space.box.scale);
+    
         i = ps.length-1
-        
+    
         ctx.quadraticCurveTo(ps[i].x * space.box.scale, ps[i].y * space.box.scale, mouse.x * space.box.scale, mouse.y * space.box.scale);
 
         ctx.stroke()
-        
+  
+  bgGridRaw: (ctx, space, res) ->
+    i = 1
+    while (d = res * i++) < space.box.right
+      dp = round(d)
+      ctx.moveTo dp, space.box.top
+      ctx.lineTo dp, space.box.bottom
+
+    i = -1
+    while (d = res * i--) > space.box.left
+      dp = round(d)
+      ctx.moveTo dp, space.box.top
+      ctx.lineTo dp, space.box.bottom
+    
+    i = 1
+    while (d = res * i++) < space.box.bottom
+      dp = round(d)
+      ctx.moveTo space.box.left,  dp
+      ctx.lineTo space.box.right, dp
+
+    i = -1
+    while (d = res * i--) > space.box.top
+      dp = round(d)
+      ctx.moveTo space.box.left,  dp
+      ctx.lineTo space.box.right, dp
+
   bgGrid: (ctx, space) ->
-        ctx.strokeStyle = Settings.color.light1
-        ctx.lineWidth = 1
-        
-        ctx.beginPath()
-        #ctx.translate(-0.5, -0.5)
-        
-        i = 1
-        while (d = Settings.scale * space.box.scale * i++) < space.box.right
-            ctx.moveTo d, space.box.top
-            ctx.lineTo d, space.box.bottom
+    c = (l) -> "rgba(0, 0, 0, #{l})"
+    ctx.lineWidth = 1
+    
+    #ctx.translate(-0.5, -0.5)
+    
+    q = log(space.box.scale)/log(Settings.scale)
+    q += 0.25
+    res1 = floor q 
+    res2 = res1 - 1
 
-        i = -1
-        while (d = Settings.scale * space.box.scale * i--) > space.box.left
-            ctx.moveTo d, space.box.top
-            ctx.lineTo d, space.box.bottom
-        
-        i = 1
-        while (d = Settings.scale * space.box.scale * i++) < space.box.bottom
-            ctx.moveTo space.box.left,  d
-            ctx.lineTo space.box.right, d
+    ctx.beginPath()
+    @bgGridRaw ctx, space, (Settings.scale * space.box.scale * pow(Settings.scale, -res1))
+    ctx.strokeStyle = c Settings.grid.lightness * min(1, abs(res1 - q))
+    ctx.stroke()
 
-        i = -1
-        while (d = Settings.scale * space.box.scale * i--) > space.box.top
-            ctx.moveTo space.box.left,  d
-            ctx.lineTo space.box.right, d
-            
-        ctx.stroke()
-        
-        ctx.lineWidth = 1
-        ctx.strokeStyle = Settings.color.light2
-        
-        ctx.beginPath()
-        
-        ctx.moveTo(0, space.box.top)
-        ctx.lineTo(0, space.box.bottom)
-        
-        ctx.moveTo(space.box.left, 0)
-        ctx.lineTo(space.box.right, 0)
-        
-        ctx.stroke()
-        
-        #ctx.translate(0.5, 0.5)
+    ctx.beginPath()
+    @bgGridRaw ctx, space, (Settings.scale * space.box.scale * pow(Settings.scale, -res2))
+    ctx.strokeStyle = c Settings.grid.lightness * min(1, abs(res2 - q))
+    ctx.stroke()
+    
+    ctx.translate(-0.5, -0.5)
+    ctx.lineWidth = 1.5
+    ctx.strokeStyle = Settings.color.light2
+    
+    ctx.beginPath()
+    
+    ctx.moveTo(0, space.box.top)
+    ctx.lineTo(0, space.box.bottom)
+    
+    ctx.moveTo(space.box.left, 0)
+    ctx.lineTo(space.box.right, 0)
+    
+    ctx.stroke()
+    
+    ctx.translate(0.5, 0.5)
                 
-globalize {Draw, Settings, Show}
+globalize {Draw, Show}

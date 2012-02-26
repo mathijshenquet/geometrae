@@ -8,4 +8,3 @@ asset(10, 'cf', "$root/qnum.coffee");
 asset(11, 'cf', "$root/calculator.coffee");
 asset(11, 'cf', "$root/lang.coffee");
 asset(11, 'cf', "$root/ops.coffee");
-
