@@ -1,20 +1,44 @@
+shape_color = "#444"
+
 Settings =
     point:
-        draw_radius: 2.1
+        draw_radius: 2.5
         hit_radius:  16
         hover_draw_radius: 10
         label_distance: 17
         create_distance: 6 # de afstand waarna de engine overgaat in selecte ipv puntmaken
-        
+    
+        color: "#666"
+
+        free:
+            color: "#006cff"
+
+        selected:
+            color: "#006cff"
+
+    shape:
+        color: shape_color
+        line_width: 1
+
+        helper:
+            color: shape_color
+            line_width: 1/4
+
+        selected:
+            color: "#006cff"
+            line_width: 1.5
+
     select:
         segment_length: 5
         segment_jmp: 33
         
     label:
+        color: "#000"
         dx: 10
         dy: 0
         d: 7.5
         font_size: 11
+        font_family: "sans-serif"
         
     listing:
         x: 5
@@ -24,8 +48,7 @@ Settings =
     
     scale: 8
     
-    zoom:
-        default: pow(2, -(pow(2,7)-2))
+    zoom: pow(2, -(pow(2,7)-2))
 
     grid:
         lightness: 0.1

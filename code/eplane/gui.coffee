@@ -37,13 +37,23 @@ class Toolbar
         @element.append group_element
 
         tools.forEach (tool) ->
-            tool_element = $("<li class=tool_#{tool.id} title=\"#{tool.name}\"></li>")
+            size = 38
 
-            icon = $('<canvas width=32 height=32>')
+            tool_element = $("<li class=tool_#{tool.id} title=\"#{tool.name}\" style=width:#{size}px;height:#{size}px; ></li>")
+
+            icon = $("<canvas width=#{size} height=#{size}>")
             tool_element.append icon
 
             ctx = icon[0].getContext('2d')
-            box = { scale: 32 }
+
+            gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, sqrt(pow(size,2)/2))
+            gradient.addColorStop(1/8, "#fff")
+            gradient.addColorStop(1, "#ccc")
+
+            ctx.fillStyle = gradient
+            ctx.fillRect(0, 0, size, size)
+
+            box = { scale: size }
             tool.icon(ctx, box) if tool.icon
 
             tool_element.mousedown (e) -> return false

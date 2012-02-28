@@ -78,7 +78,7 @@ class EuclidesApp
         @snap = true
 
         @box = {}
-        @box.scale    = Settings.zoom.default
+        @box.scale = Settings.zoom
         
         @objects = []
         @points  = []

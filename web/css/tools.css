@@ -9,13 +9,10 @@
 	list-style: none;
 }
 #tools li {
-	height: 32px;
-	width: 32px;
 	margin-bottom: 5px;
 	margin-left: 5px;
 	border: 1px solid #aaa;
 	border-radius: 4px;
-	background-image: url(../images/tool_background.png);
 	float: left;
 }
 #tools li:hover {

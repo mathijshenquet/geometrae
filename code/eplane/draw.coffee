@@ -1,3 +1,20 @@
+`function roundRect(ctx, x, y, width, height, radius) {
+  if (typeof radius === "undefined") {
+    radius = 5;
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}`
+
 
 magic_circle = (ctx, x, y, r) ->
   ctx.save()
@@ -33,7 +50,7 @@ Draw =
     space = {box: space} if space.scale?
 
     ctx.beginPath()
-    ctx.fillStyle = "#006cff"
+    ctx.fillStyle = if p?.free then Settings.point.free.color else Settings.point.color
     ctx.arc(p.x * space.box.scale, p.y * space.box.scale, Settings.point.draw_radius, 0, TAU, true)
     ctx.closePath()
     ctx.fill()
@@ -54,7 +71,7 @@ Draw =
         return true
 
     #dependent points
-    ctx.fillStyle = ctx.strokeStyle = "#666"
+    ctx.fillStyle = ctx.strokeStyle = Settings.point.color
     dp = ps.filter (p) -> not p.free
 
     #draw points
@@ -73,7 +90,7 @@ Draw =
     ctx.stroke()
 
     #free points
-    ctx.fillStyle = ctx.strokeStyle = "#006cff"
+    ctx.fillStyle = ctx.strokeStyle = Settings.point.free.color
     fp = ps.filter (p) -> p.free
 
     #draw points
@@ -93,8 +110,8 @@ Draw =
     
     # draw labels
     if space.labels
-      ctx.fillStyle = "#000"
-      ctx.font = "#{Settings.label.font_size}px sans-serif"
+      ctx.fillStyle = Settings.label.color
+      ctx.font = "#{Settings.label.font_size}px #{Settings.label.font_family}"
       ctx.textBaseline = "middle"
       ctx.textAlign = "center"
       ps.filter((point) -> point.name).forEach (p) ->
@@ -116,30 +133,38 @@ Draw =
   line: (ctx, space, l) ->
     space = {box: space} if space.scale?
 
-    ctx.strokeStyle = "#666"
+    ctx.lineWidth = if l?.helper then Settings.shape.helper.line_width else 1
+    ctx.strokeStyle = if l?.selected then Settings.shape.selected.color else Settings.shape.color
     ctx.beginPath()
     Draw.rawLine ctx, l, space.box
     ctx.stroke()
   
   lines: (ctx, space, ls) ->
-    ctx.lineWidth = 1  
-    
-    #draw normal lines
-    ctx.strokeStyle = "#666"
+    # draw helper lines
+    ctx.strokeStyle = Settings.shape.helper.color
+    ctx.lineWidth = Settings.shape.helper.line_width
     ctx.beginPath()
-    ls.filter((o) -> not o.selected).forEach  (l) -> Draw.rawLine ctx, l, space.box
+    ls.filter((o) -> o.helper).forEach (l) -> Draw.rawLine ctx, l, space.box
+    ctx.stroke()
+
+    # draw normal lines
+    ctx.lineWidth = Settings.shape.line_width
+    ctx.strokeStyle = Settings.shape.color
+    ctx.beginPath()
+    ls.filter((o) -> not o.helper and not o.selected).forEach  (l) -> Draw.rawLine ctx, l, space.box
     ctx.stroke()
     
-    #draw selected lines
-    ctx.strokeStyle = "blue"
+    # draw selected lines
+    ctx.strokeStyle = Settings.shape.selected.color
+    ctx.lineWidth = Settings.shape.selected.line_width
     ctx.beginPath()
-    ls.filter((o) -> o.selected).forEach      (l) -> Draw.rawLine ctx, l, space.box
+    ls.filter((o) -> not o.helper and o.selected).forEach      (l) -> Draw.rawLine ctx, l, space.box
     ctx.stroke()
     
     # draw labels
     if space.labels
-      ctx.fillStyle = "#000"
-      ctx.font = "#{Settings.label.font_size}px sans-serif"
+      ctx.fillStyle = Settings.label.color
+      ctx.font = "#{Settings.label.font_size}px #{Settings.label.font_family}"
       ctx.textBaseline = "middle"
       ctx.textAlign = "center"
       ls.filter((o) -> o.name).forEach (l) ->
@@ -150,29 +175,37 @@ Draw =
   
   circle: (ctx, space, c) ->
     ctx.beginPath()
-    ctx.strokeStyle = "#666"
-    ctx.lineWidth = 1
+    ctx.lineWidth = if c?.helper then Settings.shape.helper.line_width else 1
+    ctx.strokeStyle = if c?.selected then Settings.shape.selected.color else Settings.shape.color
     magic_circle(ctx, c.x * space.box.scale, c.y * space.box.scale, c.r * space.box.scale)
     ctx.stroke()
          
   circles: (ctx, space, cs) ->
-    #draw normal circles
-    ctx.strokeStyle = "#666"
-    ctx.lineWidth = 1
+    # draw helper circles
+    ctx.strokeStyle = Settings.shape.helper.color
+    ctx.lineWidth = Settings.shape.helper.line_width
     ctx.beginPath()
-    cs.filter((o) -> not o.selected).forEach (c) -> magic_circle(ctx, c.x * space.box.scale, c.y * space.box.scale, c.r * space.box.scale)
+    cs.filter((o) -> o.helper).forEach (c) -> magic_circle(ctx, c.x * space.box.scale, c.y * space.box.scale, c.r * space.box.scale)
+    ctx.stroke()
+
+    #draw normal circles
+    ctx.strokeStyle = Settings.shape.color
+    ctx.lineWidth = Settings.shape.line_width
+    ctx.beginPath()
+    cs.filter((o) -> not o.helper and not o.selected).forEach (c) -> magic_circle(ctx, c.x * space.box.scale, c.y * space.box.scale, c.r * space.box.scale)
     ctx.stroke()
     
     #draw selected circles
-    ctx.strokeStyle = "blue"
-    ctx.lineWidth = 1
+    ctx.strokeStyle = Settings.shape.selected.color
+    ctx.lineWidth = Settings.shape.selected.line_width
     ctx.beginPath()
 
-    cs.filter((o) -> o.selected).forEach     (c) -> magic_circle(ctx, c.x * space.box.scale, c.y * space.box.scale, c.r * space.box.scale)
+    cs.filter((o) -> not o.helper and o.selected).forEach     (c) -> magic_circle(ctx, c.x * space.box.scale, c.y * space.box.scale, c.r * space.box.scale)
     ctx.stroke()
     
     if space.labels
-      ctx.font = "#{Settings.label.font_size}px sans-serif"
+      ctx.fillStyle = Settings.label.color
+      ctx.font = "#{Settings.label.font_size}px #{Settings.label.font_family}"
       ctx.textBaseline = "middle"
       ctx.textAlign = "center"
       cs.filter((o) -> o.name).forEach (c) ->
