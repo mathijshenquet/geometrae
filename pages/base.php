@@ -1,6 +1,7 @@
 <!doctype html>
 <meta charset="utf-8">
 <title><?= get('title') ?></title>
+<meta name="author" content="<?= get("author") ?>">
 
 
 <?php if(strpos($_SERVER['HTTP_USER_AGENT'],'iPad')): ?>

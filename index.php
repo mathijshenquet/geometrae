@@ -17,6 +17,18 @@ routes(array(
 		'route'  	=> '/login',
 		'page' 		=> "./pages/login.php"
 	),
+	"logout"		=> array(
+		'route'		=> "/logout",
+		'page'		=> "./pages/logout.php"
+	),
+	"settings"		=> array(
+		'route'		=> "/settings",
+		'page'		=> "./pages/settings.php"
+	),
+	"dashboard"		=> array(
+		'route'		=> "/dashboard",
+		'page'		=> "./pages/dashboard.php"
+	),
 	"docs"			=> array(
 		'route'  	=> "/docs/[:page]",
 		'page' 		=> "./pages/docs.php"

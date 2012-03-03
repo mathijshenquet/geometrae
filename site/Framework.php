@@ -1,5 +1,7 @@
 <?php
 if( !defined( __DIR__ ) )define( __DIR__, dirname(__FILE__) );
+include ('./site/db.php');
+session_start();
 
 class Site{
 	private static $instance;

@@ -33,7 +33,7 @@ set('author', "Cas Cornelissen, Mathijs Henquet")
 <div id="footer">
 	<div class="wrapper">
 		<p>Alle rechten voorbehouden &copy; 2011 - <?php echo date('Y') ?></p>
-		<p><a href="#">Mathijs Henquet</a> <span class="amp">&amp;</span> <a href="#">Cas Cornelissen</a></p>
+		<p><a href="#">Mathijs Henquet</a> <span class="amp">&amp;</span> <a href="http://rawox.co.cc">Cas Cornelissen</a></p>
 	</div>
 </div>
 <?php endif; ?>

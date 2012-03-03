@@ -68,8 +68,9 @@ INLINE
 <div id="preview">
 	<div class="wrapper">
 		<div id="preview_text">
-			<h1>Leer geometrie</h1>
-			<p>Geometrae is de makkelijkste manier om geometrie te doen, en leren. Het is interactief, leuk en je kan het met vrienden doen.</p>
+			<h2>Geometrae is online!</h2>
+			<p>Geometrae is eindelijk online! Via deze website leer je om te gaan met geometrie zoals de oude meesters dat deden. Het is interactief, het is leuk en zeker ook sociaal.</p>
+			<a href="login" class="button">Begin met Geometrae!</a>
 		</div>
 		<div class="app preview"></div>
 	</div>
@@ -77,8 +78,13 @@ INLINE
 </div>
 <div id="news">
 	<div class="wrapper">
-		<p>Meld je nu gratis aan voor Geometrae, en begin vandaag nog met de eerste geometrie lessen!</p>
-		<a href="<?= link_to("login") ?>" class="button" id="button_signup">Begin met Geometrae!</a>
+		<p>Meld je nu gratis aan voor Geometrae, en duik vandaag nog in de wondere wereld van de geometrie! Iedereen kan het &eacute;n het is gratis, dus waarom zou je het niet proberen?</p>
+		<div id="social_icons">
+			<a href="#facebook"><img src="web/images/social_facebook.png" alt="Facebook" /></a>
+			<a href="#twitter"><img src="web/images/social_twitter.png" alt="Twitter" /></a>
+			<a href="#github"><img src="web/images/social_github.png" alt="Github" /></a>
+			<a href="#email"><img src="web/images/social_email.png" alt="Email" /></a>
+		</div>
 	</div>
 </div>
 <div id="content">
@@ -86,28 +92,28 @@ INLINE
 		<div class="inforow">
 			<div class="infobox">
 				<h3 id="title_learnbest">Leer van de beste</h3>
-				<p>De lessen van Geometrae zijn gebaseerd op de boeken van Euclides van Alexandrië, de grondlegger van de geometrie!</p>
+				<p>De lessen van Geometrae zijn gebaseerd op Euclides, de grondlegger van de geometrie!</p>
 			</div>
 			<div class="infobox">
 				<h3 id="title_playandlearn">Spelen en leren tegelijk</h3>
-				<p>Door de speelse opbouw, en het hoge tempo is geometrie leren niet langer iets dat saai hoeft te zijn.</p>
+				<p>Door de speelse opbouw en het hoge tempo hoeft geometrie echt niet saai te zijn!</p>
 			</div>
 			<div class="infobox">
 				<h3 id="title_achievements">Uitdagingen</h3>
-				<p>Voor de voleerde wiskundige zijn er verschillende uitdagingen voor nog meer geometrie.</p>
+				<p>Voor de volleerde wiskundige zijn er verschillende uitdagingen voor nog meer geometrie.</p>
 			</div>
 		</div>
 		<div class="inforow">
 			<div class="infobox">
 				<h3 id="title_highestscore">Construeer</h3>
-				<p>Door de intuitieve interface is het construeren van geometrische vormen nog nooit zo makkelijk geweest.</p>
+				<p>Door de intuitieve interface was het construeren van geometrische vormen nog nooit zo makkelijk.</p>
 			</div>
 			<div class="infobox">
 				<h3 id="title_start">Automatiseer</h3>
-				<p>Met de ingebouwde programmeer taal GDL, kunnen makkelijk ingewikkelde constructies worden gemaakt of geverifeerd.</p>
+				<p>Met onze simpele programmeertaal kunnen ingewikkelde constructies worden gemaakt.</p>
 			</div>
 			<div class="infobox">
-				<h3 id="title_beatfriends">Hou je score bij, en versla je vrienden</h3>
+				<h3 id="title_beatfriends">Hou je score bij en versla je vrienden</h3>
 				<p>Geometrae houdt alle vorderingen, van lessen tot uitdagingen, voor je bij.</p>
 			</div>
 		</div>

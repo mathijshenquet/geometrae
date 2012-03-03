@@ -3,11 +3,23 @@
 		<div id="logo">
 			<h1>Geometrae</h1>
 		</div>
-		<ul id="nav">
-            <li><a href="<?= link_to('homepage') ?>">Home</a></li>
-            <li><a href="<?= link_to('sandbox') ?>">Sandbox</a></li>
-            <li><a href="<?= link_to('docs', array('page'=>'main')) ?>">Docs</a></li>
-            <li><a href="<?= link_to('login') ?>">Aanmelden</a></li>
-        </ul>
+		<?php if ( isset($_SESSION['username'])) {?>
+			<ul id="nav">
+	            <li><a href="<?= link_to('homepage') ?>">Home</a></li>
+	            <li><a href="<?= link_to('dashboard') ?>">Dashboard</a></li>
+	            <li><a href="<?= link_to('sandbox') ?>">Sandbox</a></li>
+	            <li><a href="<?= link_to('settings') ?>">Instellingen</a></li>
+	            <li><a href="<?= link_to('logout') ?>">Log uit</a></li>
+	        </ul>
+        <?php } else { ?>
+			<ul id="nav">
+	            <li><a href="<?= link_to('homepage') ?>">Home</a></li>
+	            <li><a href="<?= link_to('login') ?>">Aanmelden</a></li>
+	            <li><a href="<?= link_to('sandbox') ?>">Sandbox</a></li>
+	        </ul>
+        <?php } ?>
 	</div>
+    <?php 
+    	if (isset($_SESSION['username'])) { include ('./pages/userbar.php'); }
+    ?>
 </div>
