@@ -32,6 +32,10 @@ routes(array(
 	"exercise"		=> array( 
 		'route'		=> '/exercise',
 		'page'		=> "./pages/exercise.php"
+	),
+	"gdl"			=> array(
+		'route'		=> '/gdl',
+		'page'		=> './pages/gdl.php'
 	)
 ));
 

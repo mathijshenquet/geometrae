@@ -38,19 +38,20 @@ magic_circle = (ctx, x, y, r) ->
   ctx.restore()
     
 Show =
-    coords: ({x, y}) -> "(#{(x/Settings.scale).toFixed(1)},#{(y/Settings.scale).toFixed(1)})"
+    coords: ({x, y}) -> "(#{(x/Settings.grid.scale).toFixed(1)},#{(y/Settings.grid.scale).toFixed(1)})"
 
 Draw =
-  magic: (ctx, space, thing) -> switch
-    when thing instanceof Point  then Draw.point  ctx, space, thing
-    when thing instanceof Line   then Draw.line   ctx, space, thing
-    when thing instanceof Circle then Draw.circle ctx, space, thing
+  magic: (ctx, space, thing) -> switch thing.type
+    when 'Point'  then Draw.point  ctx, space, thing
+    when 'Line'   then Draw.line   ctx, space, thing
+    when 'Circle' then Draw.circle ctx, space, thing
 
   point: (ctx, space, p) ->
     space = {box: space} if space.scale?
 
+    ctx.fillStyle = if p.free? and not p.free then Settings.point.color else Settings.point.free.color
+
     ctx.beginPath()
-    ctx.fillStyle = if p?.free then Settings.point.free.color else Settings.point.color
     ctx.arc(p.x * space.box.scale, p.y * space.box.scale, Settings.point.draw_radius, 0, TAU, true)
     ctx.closePath()
     ctx.fill()
@@ -70,50 +71,48 @@ Draw =
         gridMap[x][y].push p
         return true
 
+
+    drawPointGroup = (group) ->
+      #group = group.filter (p) -> not space.shouldCullPoint p
+
+      #points
+      ctx.beginPath()
+      group.forEach (p) ->
+        x = p.x * space.box.scale
+        y = p.y * space.box.scale
+        r = Settings.point.draw_radius
+
+        ctx.moveTo x+r, y
+        ctx.arc x, y, r, 0, TAU
+      ctx.fill()
+
+      #hover radi
+      ctx.beginPath()
+      group.filter((p) -> p.hover or p.selected).forEach (p) ->
+        x = p.x * space.box.scale
+        y = p.y * space.box.scale
+        r = Settings.point.hover_draw_radius
+
+        ctx.moveTo x+r, y
+        ctx.arc x, y, r, 0, TAU
+      ctx.stroke()
+
+    ctx.lineWidth = 1
+
     #dependent points
     ctx.fillStyle = ctx.strokeStyle = Settings.point.color
-    dp = ps.filter (p) -> not p.free
-
-    #draw points
-    ctx.beginPath()
-    dp.filter((p) -> not space.shouldCullPoint p).forEach (p) ->
-      ctx.arc(p.x * space.box.scale, p.y * space.box.scale, Settings.point.draw_radius, 0, TAU, true)
-      ctx.closePath()
-    ctx.fill()
-
-    #draw hover radi
-    ctx.beginPath()
-    ctx.lineWidth = 1
-    dp.filter((p) -> p.hover).forEach (p) ->
-      ctx.arc(p.x * space.box.scale, p.y * space.box.scale, Settings.point.hover_draw_radius, 0, TAU, true)
-      ctx.closePath()
-    ctx.stroke()
+    drawPointGroup ps.filter((p) -> not p.free)
 
     #free points
     ctx.fillStyle = ctx.strokeStyle = Settings.point.free.color
-    fp = ps.filter (p) -> p.free
-
-    #draw points
-    ctx.beginPath()
-    fp.forEach (p) ->
-      ctx.arc(p.x * space.box.scale, p.y * space.box.scale, Settings.point.draw_radius, 0, TAU, true)
-      ctx.closePath()
-    ctx.fill()
-    
-    #draw hover radi
-    ctx.beginPath()
-    ctx.lineWidth = 1
-    fp.filter((p) -> p.hover).forEach (p) ->
-      ctx.arc(p.x * space.box.scale, p.y * space.box.scale, Settings.point.hover_draw_radius, 0, TAU, true)
-      ctx.closePath()
-    ctx.stroke()
+    drawPointGroup ps.filter((p) -> p.free)
     
     # draw labels
     if space.labels
       ctx.fillStyle = Settings.label.color
       ctx.font = "#{Settings.label.font_size}px #{Settings.label.font_family}"
-      ctx.textBaseline = "middle"
-      ctx.textAlign = "center"
+      ctx.textBaseline = "alphabetic"
+      ctx.textAlign = "left"
       ps.filter((point) -> point.name).forEach (p) ->
         if p.name
           ctx.fillText p.name, p.x * space.box.scale + Settings.point.label_distance, p.y * space.box.scale
@@ -174,6 +173,8 @@ Draw =
         ctx.fillText l.name, (lx - c*(l.y1-l.y2)) * space.box.scale, (ly + c*(l.x1-l.x2)) * space.box.scale
   
   circle: (ctx, space, c) ->
+    space = {box: space} if space.scale?
+
     ctx.beginPath()
     ctx.lineWidth = if c?.helper then Settings.shape.helper.line_width else 1
     ctx.strokeStyle = if c?.selected then Settings.shape.selected.color else Settings.shape.color
@@ -218,7 +219,22 @@ Draw =
         ly = c.y * space.box.scale + d*sin(a)
                 
         ctx.fillText c.name, lx, ly
-        
+  
+  selectionBox: (ctx, space, origin, target) ->
+      ctx.strokeStyle = "#66F"
+      ctx.lineWidth = 1
+
+      console.log origin.x * space.box.scale, origin.y * space.box.scale
+
+      ctx.beginPath()
+      ctx.moveTo origin.x * space.box.scale, origin.y * space.box.scale
+      ctx.lineTo target.x * space.box.scale, origin.y * space.box.scale
+      ctx.lineTo target.x * space.box.scale, target.y * space.box.scale
+      ctx.lineTo origin.x * space.box.scale, target.y * space.box.scale
+      ctx.closePath()
+
+      ctx.stroke()
+
   selectionLine: (ctx, space, ps, mouse) ->
         return null if ps.length < 2
 
@@ -271,24 +287,24 @@ Draw =
     
     #ctx.translate(-0.5, -0.5)
     
-    q = log(space.box.scale)/log(Settings.scale)
+    q = log(space.box.scale)/log(Settings.grid.scale)
     q += 0.25
     res1 = floor q 
     res2 = res1 - 1
 
     ctx.beginPath()
-    @bgGridRaw ctx, space, (Settings.scale * space.box.scale * pow(Settings.scale, -res1))
+    @bgGridRaw ctx, space, (Settings.grid.scale * space.box.scale * pow(Settings.grid.scale, -res1))
     ctx.strokeStyle = c Settings.grid.lightness * min(1, abs(res1 - q))
     ctx.stroke()
 
     ctx.beginPath()
-    @bgGridRaw ctx, space, (Settings.scale * space.box.scale * pow(Settings.scale, -res2))
+    @bgGridRaw ctx, space, (Settings.grid.scale * space.box.scale * pow(Settings.grid.scale, -res2))
     ctx.strokeStyle = c Settings.grid.lightness * min(1, abs(res2 - q))
     ctx.stroke()
     
     ctx.translate(-0.5, -0.5)
     ctx.lineWidth = 1.5
-    ctx.strokeStyle = Settings.color.light2
+    ctx.strokeStyle = Settings.grid.axis
     
     ctx.beginPath()
     

@@ -4,7 +4,7 @@
 # The Lexer class reads a stream of CoffeeScript and divvies it up into tagged
 # tokens. Some potential ambiguity in the grammar has been avoided by
 # pushing some extra smarts into the Lexer.
-exports.GDLLexer = class Lexer
+global.GDLLexer = class Lexer
 
   # **tokenize** is the Lexer's main method. Scan by attempting to match tokens
   # one at a time, using a regular expression anchored at the start of the
@@ -56,6 +56,9 @@ exports.GDLLexer = class Lexer
     [metadata, label, content] = match
     @token 'METADATA', {label, content}
     @line += 1
+
+    console.log label, content
+
     metadata.length
     
   identifierToken: ->
@@ -140,7 +143,7 @@ exports.GDLLexer = class Lexer
         @token 'OUTDENT', dent
     @outdebt -= moveOut if dent
     @tokens.pop() while @value() is ';'
-    #@token 'TERMINATOR', '\n' unless @tag() is 'TERMINATOR' or noNewlines
+    @token 'TERMINATOR', '\n' unless @tag() is 'TERMINATOR' or noNewlines
     this
 
   # Matches and consumes non-meaningful whitespace. Tag the previous token
@@ -157,7 +160,7 @@ exports.GDLLexer = class Lexer
   # Generate a newline token. Consecutive newlines get merged together.
   newlineToken: ->
     @tokens.pop() while @value() is ';'
-    #@token 'TERMINATOR', '\n' unless @tag() is 'TERMINATOR'
+    @token 'TERMINATOR', '\n' unless @tag() is 'TERMINATOR'
     this
 
   # Token Manipulators
@@ -171,15 +174,15 @@ exports.GDLLexer = class Lexer
     stack = []
     {tokens} = this
     i = tokens.length
-    tokens[--i][0] = 'PARAM_END'
+    tokens[--i].tag = 'PARAM_END'
     while tok = tokens[--i]
-      switch tok[0]
+      switch tok.tag
         when ')'
           stack.push tok
         when '(', 'CALL_START'
           if stack.length then stack.pop()
-          else if tok[0] is '('
-            tok[0] = 'PARAM_START'
+          else if tok.tag is '('
+            tok.tag = 'PARAM_START'
             return this
           else return this
     this
@@ -210,15 +213,15 @@ exports.GDLLexer = class Lexer
 
   # Add a token to the results, taking note of the line number.
   token: (tag, value) ->
-    @tokens.push [tag, value, @line]
+    @tokens.push {tag, value, line: @line}
 
   # Peek at a tag in the current token stream.
   tag: (index, tag) ->
-    (tok = last @tokens, index) and if tag then tok[0] = tag else tok[0]
+    (tok = last @tokens, index) and if tag then tok.tag = tag else tok.tag
 
   # Peek at a value in the current token stream.
   value: (index, val) ->
-    (tok = last @tokens, index) and if val then tok[1] = val else tok[1]
+    (tok = last @tokens, index) and if val then tok.value = val else tok.value
 
   # Converts newlines for string literals.
   escapeLines: (str, heredoc) ->

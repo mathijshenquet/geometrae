@@ -39,6 +39,11 @@ toon = show = (objects...) ->
 	objects
 
 Constructions =
+	circle: (a, b) ->
+		c = circle a, b
+		show c
+		[a, b, c]
+
 	line: (a, b) ->
 		l = lijn a, b
 		show l

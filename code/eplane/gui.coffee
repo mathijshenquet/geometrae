@@ -11,12 +11,16 @@ class Gui
 
 class Toolbar
     constructor: (@space) ->
-        @element = $("<div id=tools style=z-index:10>")
+        @element = $("<div id=tools style=z-index:10;position:absolute;margin:20px;>")
         @space.element.append @element
-
+        @focused_tool_element = null
         @hidden = false
 
         for group in Settings.toolbar
+            if group == '---'
+                @addSeperator()
+                continue
+
             for tool in group
                 do (tool) =>
                     if (isRootTool = tool.tool[0] == '!')
@@ -32,19 +36,20 @@ class Toolbar
         @hidden = not @hidden
         @element.hide()
     
+    addSeperator: ->
+        sep = $("<div class=tool_sep style=clear:left;width:#{Settings.toolbar.size}px>")
+        @element.append sep
+
     addGroup: (tools) ->
-        group_element = $("<ul id=#{name}>")
+        group_element = $("<div style=clear:left>")
         @element.append group_element
 
-        tools.forEach (tool) ->
-            size = 38
+        tools.forEach (tool) =>
+            size = Settings.toolbar.size
 
-            tool_element = $("<li class=tool_#{tool.id} title=\"#{tool.name}\" style=width:#{size}px;height:#{size}px; ></li>")
+            tool_element = $("<canvas class=tool title=\"#{tool.name}\" width=#{size} height=#{size} style=display:block;float:left>")
 
-            icon = $("<canvas width=#{size} height=#{size}>")
-            tool_element.append icon
-
-            ctx = icon[0].getContext('2d')
+            ctx = tool_element[0].getContext('2d')
 
             gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, sqrt(pow(size,2)/2))
             gradient.addColorStop(1/8, "#fff")
@@ -60,17 +65,19 @@ class Toolbar
 
             tool_element.mouseup (e) -> return false
 
-            tool_element.click (e) ->
+            tool_element.click (e) =>
+                $('.selected').removeClass('selected').fadeTo(500, 0.618)
+                tool_element.addClass('selected')
                 tool.fn()
                 e.stopPropagation()
                 return false
 
             tool_element.fadeTo(0, 0.5)
 
-            tool_element.hover (->
+            tool_element.hover (=>
                     tool_element.stop().fadeTo(100, 0.9)
                 ), (->
-                    tool_element.stop().fadeTo(500, 0.618)
+                    tool_element.stop().fadeTo(500, 0.618) if not tool_element.hasClass('selected')
                 )
 
             group_element.append tool_element

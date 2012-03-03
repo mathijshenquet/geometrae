@@ -7,7 +7,7 @@
 
 # The **Rewriter** class is used by the [Lexer](lexer.html), directly against
 # its internal array of tokens.
-exports.GDLRewriter = class Rewriter
+global.GDLRewriter = class Rewriter
 
   # Helpful snippet for debugging:
   #     console.log (t[0] + '/' + t[1] for t in @tokens).join ' '

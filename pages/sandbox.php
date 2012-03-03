@@ -17,7 +17,6 @@ $ ->
     body = $("body")
     
     euclides = new EuclidesApp($(".euclides"));
-    makeGDLConsole(euclides)
 
     resizeCanvas = ->
         fullscreen = body.hasClass("fullscreen")
@@ -45,8 +44,6 @@ $ ->
 INLINE
 );
 ?>
-
-<?= render('./pages/_gdl_console.php') ?>
 
 <div class="euclides sandbox">
 </div>

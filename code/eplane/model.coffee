@@ -24,12 +24,14 @@ class Entity
     }`    
     
     # We initialize objects to set properies that are to be used by the instances of entity.
-    initialize: (parents=[]) ->
+    initialize: (parents=[], @space) ->
         # Hierachy        
         @children = []
         @parents = []
         for parent in parents
-          @parents.push parent
+            @parents.push parent
+
+        @space ?= parents[0].space
           
         @dependingObjects = []
         @ancestors        = @calculateAncestors()
@@ -165,10 +167,19 @@ class Entity
         return true
 
 class Point extends Entity
+    type: "Point"
+
     hits: (obj) -> distance(obj, this) < Settings.point.hit_radius
     
+    equal: (other) -> other.laysOn this
+
+    boundedBy: (a, b) -> between(a.x, @x, b.x) and between(a.y, @y, b.y)
+
     laysOn: (obj) ->
         switch
+            when obj instanceof Point
+                s = 1/@space.box.scale
+                feq(obj.x, @x, s) and feq(obj.y, @y, s)
             when obj instanceof Circle then feq(distance(obj, this), obj.r)
             when obj instanceof Line
                 c1 = 0.99 < (a = dydx(obj.p1, this))/(b = obj.rc) < 1.01 or
@@ -210,8 +221,8 @@ class FreePoint extends Point
             
         get: -> @_y
         
-    constructor: (x, y) ->
-        @initialize()
+    constructor: (x, y, @space) ->
+        @initialize([], @space)
         
         @x = x
         @y = y
@@ -219,6 +230,12 @@ class FreePoint extends Point
     free: true
 
 class Line extends Entity
+    equal: (other) -> (other.p1.equal(this.p1) and other.p2.equal(this.p2)) or (other.p1.equal(this.p2) and other.p2.equal(this.p1))
+
+    boundedBy: (a, b) -> (between(a.x, @p1.x, b.x) and between(a.y, @p1.y, b.y)) or (between(a.x, @p2.x, b.x) and between(a.y, @p2.y, b.y))
+
+    type: "Line"
+
     @attr "x1"
         set: (v) -> @p1.x = v; v
         get: -> @p1.x
@@ -243,6 +260,9 @@ class Line extends Entity
             
         get: -> @_extended
 
+    @raw = class extends this
+        constructor: (@p1, @p2) ->
+
     constructor: (@p1, @p2) ->
         @initialize([@p1, @p2])
         @destroy() if @p1 == @p2
@@ -255,10 +275,21 @@ class Line extends Entity
         @vertical = Math.abs(@rc) == Infinity
 
 class Circle extends Entity
+    equal: (other) -> other.p1.equal(this.p1) and other.p2.laysOn(this)
+
+    boundedBy: (a, b) -> between(a.x, @p1.x, b.x) and between(a.y, @p1.y, b.y)
+
+    type: "Circle"
+
     constructor: (@p1, @p2) ->
         @initialize([@p1, @p2])
         @destroy() if @p1 == @p2
-        
+    
+    @raw = class extends this
+        constructor: (@x, @y, @r) ->
+        @::p1 = @::p2 =
+            laysOn: -> false
+
     calculate: ->
         @x = @p1.x
         @y = @p1.y

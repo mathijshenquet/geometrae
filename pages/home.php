@@ -12,10 +12,10 @@ $ ->
     euclides.toggleHide("toolbar")
 
     {x, y} = euclides.toCanvasCoords({x: 85, y: 125})
-    a = new FreePoint(x, y)
+    a = new FreePoint(x, y, euclides)
 
     {x, y} = euclides.toCanvasCoords({x: 135, y: 55})
-    b = new FreePoint(x, y)
+    b = new FreePoint(x, y, euclides)
 
     c1 = new Circle a, b
     c2 = new Circle b, a
@@ -33,10 +33,10 @@ $ ->
     euclides.attach [a, b, c1, c2, i1, i2, l1, l2, l3, l4, l5, l6]
 
     {x, y} = euclides.toCanvasCoords({x: 600-135, y: 125})
-    a = new FreePoint(x, y)
+    a = new FreePoint(x, y, euclides)
 
     {x, y} = euclides.toCanvasCoords({x: 600-85, y: 55})
-    b = new FreePoint(x, y)
+    b = new FreePoint(x, y, euclides)
 
     c = new Circle(a, b)
     l = new Line(a, b)
@@ -44,10 +44,10 @@ $ ->
     euclides.attach [a, b, c, l]
 
     {x, y} = euclides.toCanvasCoords({x: 300-75, y: 230})
-    a = new FreePoint(x, y)
+    a = new FreePoint(x, y, euclides)
 
     {x, y} = euclides.toCanvasCoords({x: 300+50, y: 185})
-    b = new FreePoint(x, y)
+    b = new FreePoint(x, y, euclides)
 
     c1 = new Circle(a, b)
     c2 = new Circle(b, a)

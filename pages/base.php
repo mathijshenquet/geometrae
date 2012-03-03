@@ -1,7 +1,14 @@
 <!doctype html>
 <meta charset="utf-8">
 <title><?= get('title') ?></title>
-<meta name="author" content="<?= get("author") ?>">
+
+
+<?php if(strpos($_SERVER['HTTP_USER_AGENT'],'iPad')): ?>
+	<meta name="author" content="<?= get("author") ?>">
+	<meta name="viewport" content="width = device-width, initial-scale = 1, user-scalable = no">
+	<link rel="stylesheet" media="screen and (orientation: portrait)"  href="/web/css/ipad_portrait.css">
+	<link rel="stylesheet" media="screen and (orientation: landscape)" href="/web/css/ipad_landscape.css">
+<?php endif; ?>
 
 <?= render_assets_until(0) ?>
 

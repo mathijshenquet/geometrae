@@ -1,19 +1,25 @@
 processEvent = (e, box) ->
-    x = null
-    x ?= e?.pageX
-    x ?= e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft
-    x -= box.offsetLeft
+    if TouchEvent? and e instanceof TouchEvent
+        processEvent(touch, box) for touch in e.touches
+        processEvent(touch, box) for touch in e.changedTouches
+        processEvent(touch, box) for touch in e.targetTouches
+        return e
 
-    e.realX = x
-    e.x = (x - box.center_x)/box.scale
+    absoluteX = (e.pageX ? e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft) - box.offsetLeft
+    relativeX = (absoluteX - box.center_x)/box.scale
     
-    y = null
-    y ?= e?.pageY
-    y ?= e.clientY + document.body.scrollTop + document.documentElement.scrollTop
-    y -= box.offsetTop
+    absoluteY = (e.pageY ? e.clientY + document.body.scrollTop + document.documentElement.scrollTop) - box.offsetTop
+    relativeY = (absoluteY - box.center_y)/box.scale
 
-    e.realY = y
-    e.y = (y - box.center_y)/box.scale
+    e.absoluteX = absoluteX
+    e.absoluteY = absoluteY
+    e.relativeX = relativeX
+    e.relativeY = relativeY
+
+    e.absolute = {x: absoluteX, y: absoluteY}
+    e.relative = {x: relativeX, y: relativeY}
+
+    return e
 
 class EuclidesApp    
     shouldCullPoint: (point) -> not (@box.left < (point.x * @box.scale) < @box.right and @box.top < (point.y * @box.scale) < @box.bottom)
@@ -78,7 +84,7 @@ class EuclidesApp
         @snap = true
 
         @box = {}
-        @box.scale = Settings.zoom
+        @box.scale = Settings.box.zoom
         
         @objects = []
         @points  = []
@@ -122,58 +128,69 @@ class EuclidesApp
 
             {push, undo, redo}
 
-        @element.mousedown (e) =>
-            e.preventDefault()
-            processEvent(e, @box)
-            @tool.mousedown(e)
+        bind = (type, handler) => @element[0].addEventListener type, handler
+
+        if BrowserDetect.OS == "iPad"        
+            bind 'touchstart', (e) =>
+                e.preventDefault()
+                e = processEvent(e, @box)
+                @tool.touchstart(e) if @tool.touchstart?
+
+            bind 'touchmove', (e) =>
+                e.preventDefault()
+                e = processEvent(e, @box)
+                @tool.touchmove(e) if @tool.touchmove?
+
+            bind 'touchend', (e) =>
+                e.preventDefault()
+                e = processEvent(e, @box)
+                @tool.touchend(e) if @tool.touchend?
+
+        else
+            bind "mousedown", (e) =>
+                e.preventDefault()
+                e = processEvent(e, @box)
+                @tool.mousedown(e)
+                
+            bind "mousemove", (e) =>
+                e.preventDefault()
+                e = processEvent(e, @box)
+                @tool.mousemove(e)
+                @hover(e)
             
-        @element.mousemove (e) =>
-            e.preventDefault()
-            processEvent(e, @box)
-            @tool.mousemove(e)
-            @hover(e)
+            bind "mouseup", (e) =>
+                e.preventDefault()
+                e = processEvent(e, @box)
+                @tool.mouseup(e)
         
-        @element.mouseup (e) =>
-            e.preventDefault()
-            processEvent(e, @box)
-            @tool.mouseup(e)
-    
-        @element.mousewheel (e, delta) =>
-            e.preventDefault()
-            processEvent(e, @box)
-            p = @snapPoint(e)
-
-            s0 = @box.scale
-            s1 = (@box.scale += delta/10 * @box.scale)
-            ds = s1/s0
-
-            @box.center_x -= p.x * s0 * (ds - 1)
-            @box.center_y -= p.y * s0 * (ds - 1)
-
-            @layers.background.needsDraw = true
-            @layers.objects.needsDraw = true
-            @calculateBox()
+            @element.mousewheel (e, delta) =>
+                e.preventDefault()
+                processEvent(e, @box)
+                @zoom delta, @snapPoint(e.relative)
 
         $(document)
-            .jkey 'ctrl+a', =>
+            .jkey Settings.keybindings.cancel_constr, =>
+                @selectTool 'std'
+
+            .jkey Settings.keybindings.select_all, =>
                 @clearSelection()
                 @objects.filter((object) -> object.visible).forEach (object) =>
                     object.selected = true
                     @selectionAdd(object)
 
-            .jkey 'ctrl+z', => 
+            .jkey Settings.keybindings.undo, =>
                 @history.undo()
 
-            .jkey 'ctrl+y', => 
+            .jkey Settings.keybindings.redo, => 
                 @history.redo()
 
-            .jkey 'x', true, =>
+            .jkey Settings.keybindings.extend, true, =>
                 targetObjects = [].concat @selection
                 targetState = targetObjects.some (object) -> object.extended
 
                 (object.extended = not object.extended) for object in @selection
                         
-            .jkey 'h', true, =>
+            .jkey Settings.keybindings.hide, true, =>
                 targetObjects = [].concat @selection
 
                 @history.push {
@@ -187,10 +204,9 @@ class EuclidesApp
 
                 @clearSelection()
                     
-            .jkey 'd', true, =>
+            .jkey Settings.keybindings.destroy, true, =>
                 targetObjects = []
                 targetObjects = targetObjects.concat @selection
-                targetObjects = targetObjects.concat @points.filter((point) -> point.visible and point.free and point.children.length == 0)
                 object.destroy() for object in targetObjects
 
                 @layers.objects.needsDraw = true
@@ -204,17 +220,17 @@ class EuclidesApp
 
                 @clearSelection()
                 
-            .jkey 'g', true, =>
+            .jkey Settings.keybindings.show_grid, (args...) =>
                 @grid = not @grid
                 @layers.background.needsDraw = true
-            
-            .jkey 's', true, =>
+      
+            .jkey Settings.keybindings.snap_grid, true, () =>
                 @snap = not @snap
 
-            .jkey 'l', true, =>
+            .jkey Settings.keybindings.show_listing, true, =>
                 @listing = not @listing
                             
-            .jkey 'space', true, =>
+            .jkey Settings.keybindings.clear_selection, true, =>
                 @clearSelection()
             
         @element.bind "contextmenu", (e) -> e.preventDefault()
@@ -236,7 +252,21 @@ class EuclidesApp
 
         @enterLoop()
 
+    zoom: (delta, p) ->
+        s0 = @box.scale
+        s1 = (@box.scale += delta/10 * @box.scale)
+        ds = s1/s0
+
+        @box.center_x -= round (p.x * s0 * (ds - 1))
+        @box.center_y -= round (p.y * s0 * (ds - 1))
+
+        @layers.background.needsDraw = true
+        @layers.objects.needsDraw = true
+        @calculateBox()
+
     selectTool: (name, fn=null) ->
+        @layers.tool.needsDraw = true
+
         if fn instanceof Function
             opts = {fn, inputs: fn.length}
 
@@ -255,63 +285,53 @@ class EuclidesApp
             objects = [objects]
 
         for object in objects
-            type = switch
-                when object instanceof Line       then 'line'
-                when object instanceof Circle     then 'circle'
-                when object instanceof Point      then 'point'
-            
+            continue if @objects.some((o) -> o == object)
+
+            object.forceCalculate()
+
+            pred = (other) ->
+                other.type == object.type and
+                other != object           and
+                other.visible             and
+                other.equal(object)
+
+            object.hidden = true if @objects.some(pred)
+
             @objects.push object
 
-            switch type
-                when 'line'   then @lines.push   object
-                when 'circle' then @circles.push object
-                when 'point'  then @points.push  object
+            switch object.type
+                when 'Line'
+                    @lines.push   object
+                    @shapes.push  object
+                when 'Circle'
+                    @circles.push object
+                    @shapes.push  object
+                when 'Point'
+                    @points.push  object
 
-            return null if object.helper
+            continue if object.helper
 
             switch
-                when type == 'point'
-                    object.forceCalculate()
-                    {o1, o2} = object
-                    
-                    if o2 instanceof Line
-                        [o1, o2] = [o2, o1]
-                    
-                    if o1 instanceof Line
-                        if o2 instanceof Line
-                            [l1, l2] = [o1, o2]
-                            if l1.p1.laysOn l2 or l1.p2.laysOn l2 or l2.p1.laysOn l1 or l2.p2.laysOn l1 then return null 
-
-                        #else if o2 instanceof Circle
-                        #   return null if o1.p1.laysOn o2 or o1.p2.laysOn o2
-                    
-                    #overlaps = false
-                    #@each {from: 'points'}, (point) ->
-                    #    if point.sameRoots(new_point)
-                    #        dist = distance(point, new_point)
-                    #        if dist < sml
-                    #            overlaps = true
-                    #            return false
-                    #return null if overlaps
-
+                when object.type == 'Point'
                     object.name ?= @getPointName()
               
-                when type == 'line' or type == 'circle'
-                    return null if object.p1 == object.p2
+                when object.type == 'Line' or object.type == 'Circle'
+                    #look if there is an object allready present constructed with the same points
+                    if object.p1 == object.p2
+                        object.destroy()
+                        continue
 
-                    @shapes.filter((object) -> not object.destroyed).forEach (other) =>
+                    @shapes.filter((object) -> not object.destroyed and not object.helper).forEach (other) =>
                         @addIntersections(other, object, false)
             
                     object.name ?= @getObjectName()
-                    
-                    @shapes.push object
   
-    nearestPoint: (event, limit=Settings.point.hit_radius/@box.scale) ->
+    nearestPoint: (location, limit=Settings.point.hit_radius/@box.scale) ->
         nearestPoint = null
         nearestDistance = limit
         @points.filter((point) -> point.visible).forEach (point) ->
             # When two point occupy praticly the same location, favour the first to itterate!
-            return null unless (_ = distance(event, point)) < (nearestDistance * 0.99) 
+            return null unless (_ = distance(location, point)) < (nearestDistance * 0.99) 
             nearestPoint = point
             nearestDistance = _
             
@@ -325,21 +345,21 @@ class EuclidesApp
     snapGrid: ({x, y}) ->
         return {x, y} if not @snap
 
-        q = log(@box.scale)/log(Settings.scale)
+        q = log(@box.scale)/log(Settings.grid.scale)
         q += 0.25
         res = floor q
 
-        s = (Settings.scale * pow(Settings.scale, -res))
+        s = (Settings.grid.scale * pow(Settings.grid.scale, -res))
         return {x: (s * (round x / s)), y: (s * (round y / s))}
         
     hover: (e, r) ->
-        if (currentlyHovering = @points.filter((point) -> point.hover)).length != 0
-            @layers.objects.needsDraw = true
-            currentlyHovering.forEach (point) -> point.hover = false
+        lastHover = @points.filter((point) -> point.hover)[0] ? false
+        currentHover = @nearestPoint e.relative
 
-        if(hoverPoint = @nearestPoint e)
+        if lastHover != currentHover
             @layers.objects.needsDraw = true
-            hoverPoint.hover = true
+            if lastHover then lastHover.hover = false
+            if currentHover then currentHover.hover = true
 
     selectionAdd: (object) ->
         @selection.push object
@@ -372,8 +392,8 @@ class EuclidesApp
         @box.top     = -@box.center_y
         @box.bottom  = -@box.center_y + @box.height
 
-        @box.translate_x = floor(@box.center_x) + .5
-        @box.translate_y = floor(@box.center_y) + .5
+        @box.translate_x = @box.center_x + .5
+        @box.translate_y = @box.center_y + .5
 
         @box.offsetTop = @element[0].offsetTop
         @box.offsetLeft = @element[0].offsetLeft
@@ -381,8 +401,8 @@ class EuclidesApp
         @layers[name].needsDraw = true for name of @layers
 
     centerBox: ->
-        @box.center_x = @box.width  * 0.5 # 0.382
-        @box.center_y = @box.height * 0.5 # 0.618
+        @box.center_x = floor (@box.width  * 0.5) # 0.382
+        @box.center_y = floor (@box.height * 0.5) # 0.618
 
         @calculateBox()
 
@@ -399,16 +419,14 @@ class EuclidesApp
 
     update: ->
         if (objectsToUpdate = @objects.filter (obj) -> obj.needsUpdate).length != 0
-            @layers.objects.needsDraw = true
             objectsToUpdate.forEach (obj) -> obj.forceCalculate()
+            @layers.objects.needsDraw = true
 
     draw: ->
         for layer_name of @layers
             layer = @layers[layer_name]
 
             if layer.needsDraw
-                console.log "Draw #{layer_name}"
-
                 layer.needsDraw = false
 
                 layer.ctx.save()

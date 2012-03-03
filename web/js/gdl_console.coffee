@@ -1,4 +1,4 @@
-exports.makeGDLConsole = (app) ->
+global.makeGDLConsole = (app) ->
     interpreter = new GDLInterpreter(app)
     
     $button = $("#gdl_console_button")

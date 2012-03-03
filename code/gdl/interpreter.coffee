@@ -3,7 +3,7 @@ class GDLError extends Error
   constructor: (msg) ->
     super("GDLError Fatal: #{msg}")
 
-exports.GDLInterpreter = class GDLInterpreter
+global.GDLInterpreter = class GDLInterpreter
   constructor: (@app) ->
     @lexer = new GDLLexer
     @parser = new GDLParser

@@ -1,24 +1,17 @@
-#tools {
-	position: absolute;	
-	margin-top: 20px;
-	margin-left: 25px; /* Margin left + 5px */
-}
-#tools ul {
-	clear: left;
-	height: 34px;
-	list-style: none;
-}
-#tools li {
+.tool{
 	margin-bottom: 5px;
 	margin-left: 5px;
 	border: 1px solid #aaa;
 	border-radius: 4px;
-	float: left;
 }
-#tools li:hover {
+.tool:hover {
 	cursor: pointer;
 }
-
-#tools .group {
-	margin-top: 10px;
+.tool_sep {
+	border: none;
+	border-bottom: 1px solid #ccc;
+	height: 0;
+	padding: 0 1px 0 1px;
+	margin-left: 5px;
+	margin-bottom: 5px;
 }

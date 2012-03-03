@@ -1,9 +1,11 @@
 fs = require 'fs'
-{Lexer} = require '../lexer'
-{Parser} = require '../parser'
 
-lexer = new Lexer
-parser = new Parser
+require '../helpers'
+require '../lexer'
+require '../parser'
+
+lexer = new GDLLexer
+parser = new GDLParser
 
 tokens = lexer.tokenize ("" + fs.readFileSync "simple.gdl")
 console.log tokens

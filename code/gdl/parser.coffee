@@ -1,5 +1,49 @@
+class Grammar 
+  constructor: (@name, @branches) ->
 
-exports.GDLParser = class Parser
+g = (branches...)
+
+
+grammar.validation = []
+
+grammar.labeled_expression = [
+  [{tag: "IDENTIFIER", as: 'id'}, {tag: "SYMBOL", value: ":"}, grammar.bare_expression, {tag: "TERMINATOR"}]
+]
+
+match = (expression, tokens) ->
+  for sub_expression in expression
+    continue if sub_expression.length > tokens.length
+
+    output = {}
+
+    expression_valid = true
+
+    for token_signature, i in sub_expression
+      if token_expression instanceof
+
+      for prop_name in ['tag', 'value']
+        if (prop = token_signature[prop_name])?
+          if prop instanceof Function
+            unless prop tokens[i][prop_name]
+              expression_valid = false
+              break
+          else
+            unless prop == tokens[i][prop_name]
+              expression_valid = false
+              break
+
+      break if not expression_valid
+
+      output[i] = tokens[i]
+      if tokens[i].as
+        output[tokens[i].as] = tokens[i]
+
+    return output if expression_valid
+
+
+
+
+global.GDLParser = class Parser
     parse: (tokens) ->
         tree = []
         @indent = 0
