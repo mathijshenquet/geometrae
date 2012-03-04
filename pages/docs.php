@@ -3,7 +3,7 @@ $page = $_REQUEST['page'];
 
 parent("./pages/template.php");
 set('title', 'Docs');
-require_once __DIR__.'/../site/markdown.php';
+require_once __DIR__.'/../site/lib/markdown.php';
 
 $file = __DIR__.'/../docs/'.$page.'.md';
 

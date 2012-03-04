@@ -1,0 +1,43 @@
+.eplane .tool{
+	margin-bottom: 5px;
+	margin-left: 5px;
+	border: 1px solid #aaa;
+	border-radius: 4px;
+}
+.eplane .tool:hover {
+	cursor: pointer;
+}
+.eplane .tool_sep {
+	border: none;
+	border-bottom: 1px solid #ccc;
+	height: 0;
+	padding: 0 1px 0 1px;
+	margin-left: 5px;
+	margin-bottom: 5px;
+}
+
+.eplane .overlay{
+	display: none;
+}
+
+.eplane .overlay.active{
+	background: #000;
+}
+
+.eplane .dialog{
+	left: 50%;
+	width: 480px;
+	margin-left: -240px;
+	background: white;
+	height: 100px;
+	opacity: 1;
+	display: none;
+}
+
+body.fullscreen{
+	overflow: hidden;
+}
+
+body.fullscreen .sandbox{
+	margin: 0;
+}

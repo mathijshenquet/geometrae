@@ -1,5 +1,5 @@
 <div id="userbar">
 	<div class="wrapper">
-		<p>Ingelogd als <strong><?= $_SESSION['username'] ?></strong></p>
+		<p>Ingelogd als <strong><?= g('session')->get('username') ?></strong></p>
 	</div>
 </div>

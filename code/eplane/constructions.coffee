@@ -42,18 +42,18 @@ Constructions =
 	circle: (a, b) ->
 		c = circle a, b
 		show c
-		[a, b, c]
+		[c]
 
 	line: (a, b) ->
 		l = lijn a, b
 		show l
 		l.extended = false
-		[a, b, l]
+		[l]
 
 	line_extended: (a, b) ->
 		l = lijn a, b
 		show l
-		[a, b, l]
+		[l]
 
 	bisectrice: (a, c, b_) ->
 		l1 	= line c, a
@@ -75,7 +75,7 @@ Constructions =
 
 		show(i, bis, l1, l2)
 
-		[a, c, b_, l1, l2, eq, b, c1, c2, i_, bis_, mid, i, bis]
+		[l2, eq, b, c1, c2, i_, bis_, mid, i, bis]
 
 	loodlijn: (a, b, t1) ->
 		c1 = circle a, t1
@@ -87,7 +87,7 @@ Constructions =
 
 		show t1, t2, l
 
-		[a, b, c1, c2, t1, t2, l]
+		[c1, c2, t1, t2, l]
 
 	middelloodlijn: (a, b) ->
 		c1 = circle a, b
@@ -100,7 +100,7 @@ Constructions =
 
 		show i1, i2, l
 
-		[a, b, c1, c2, i1, i2, l]
+		[c1, c2, i1, i2, l]
 
 	triangle: (a, b) ->
 		c1 = circle a, b
@@ -116,7 +116,7 @@ Constructions =
 
 		show l1, l2, l3, c
 
-		[a, b, c, c1, c2, l1, l2, l3]
+		[c, c1, c2, l1, l2, l3]
 
 	square: (a, b) ->
 		h1 = lijn a, b
@@ -144,14 +144,14 @@ Constructions =
 
 		show c, d, l1, l2, l3, l4
 
-		[a, b, c, d, h1, h2, c1, c2, c3, c4, c5, p1, p2, l1, l2, l3, l4]
+		[c, d, h1, h2, c1, c2, c3, c4, c5, p1, p2, l1, l2, l3, l4]
 
 	awesome_circles: (a, c, b) ->
 		orbit = circle a, b
 		l = lijn a, c
 		i = punt orbit, l
 
-		objects = [a, b, c, i, orbit, l]
+		objects = [i, orbit, l]
 		p1 = b
 		p2 = i
 		for [0..64]
@@ -171,7 +171,7 @@ Constructions =
 		l = lijn a, c
 		i = punt orbit, l
 
-		objects = [a, b, c, i, orbit, l]
+		objects = [i, orbit, l]
 		[p1, p2] = [b, i]
 		paint p1, p2
 

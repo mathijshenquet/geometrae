@@ -14,8 +14,8 @@ asset(1,  'js', '/web/lib/jquery.scrollTo-min.js');
 asset(100, 'inline_cf', <<<INLINE
 
 $ ->
-    canvas = $(".euclides canvas.app")
-    wrap = $(".euclides")
+    canvas = $(".eplane canvas.app")
+    wrap = $(".eplane")
     body = $("body")
     
     euclides = new EuclidesApp(canvas);
@@ -58,7 +58,6 @@ INLINE
 		<div class="button small" id="prev"><span class="quo">&laquo;</span> Vorige</div>
     	<div class="button small" id="hints">Hints</div>
 	</div>
-    <div class="euclides exercise">
-        <canvas class="app">You really need to update your browser...</canvas>
+    <div class="eplane exercise">
     </div>
 </div>

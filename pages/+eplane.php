@@ -4,7 +4,7 @@ asset(1, 'js', "/web/lib/jquery.mousewheel.js");
 asset(1, 'js', "/web/lib/jquery.jkey.js");
 asset(9, 'cf', "/code/Q.coffee");
 
-asset(-1, 'css', '/web/css/tools.css');
+asset(-1, 'css', '/web/css/eplane.css');
 
 $root = "/code/eplane";
 

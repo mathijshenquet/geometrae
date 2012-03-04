@@ -224,8 +224,6 @@ Draw =
       ctx.strokeStyle = "#66F"
       ctx.lineWidth = 1
 
-      console.log origin.x * space.box.scale, origin.y * space.box.scale
-
       ctx.beginPath()
       ctx.moveTo origin.x * space.box.scale, origin.y * space.box.scale
       ctx.lineTo target.x * space.box.scale, origin.y * space.box.scale

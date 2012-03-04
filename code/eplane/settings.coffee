@@ -99,8 +99,8 @@ Settings.default_tool =
     make_circle:    (e) -> helper(e) and (if BrowserDetect.OS == 'Mac' then (e.button == LEFT and e.ctrlKey) else false) or e.button == RIGHT
     make_line:      (e) -> helper(e) and e.button == LEFT
     translate:      (e) -> helper(e, {shift: true}) and e.button == LEFT
-    box_select:     (e) -> helper(e) and (if BrowserDetect.OS == 'Mac' then (e.button == LEFT and e.ctrlKey) else false) or e.button == RIGHT
-    line_select:    (e) -> helper(e)
+    box_select:     (e) -> helper(e) and e.button == LEFT
+    line_select:    (e) -> helper(e) and (if BrowserDetect.OS == 'Mac' then (e.button == LEFT and e.ctrlKey) else false) or e.button == RIGHT
 
 Settings.toolbar = [
     [{

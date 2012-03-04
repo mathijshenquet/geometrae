@@ -262,23 +262,13 @@ MakePerpBisectAction = makeObjectMacro {showHandle: true}, (a, b) ->
 class ConstructAction
     constructor: (@space, {@inputs, @fn}, @tool) ->
         @inputPoints = []
+        @createdPoints = []
         @currentPoint = new FreePoint(undefined, undefined, @space)
-
-    pushPoint: (point) ->
-        @inputPoints.push point
-
-        if @inputs == @inputPoints.length
-            return @finalize()
-        
-        @currentPoint = new FreePoint(undefined, undefined, @space)
-
-        if @inputs == @inputPoints.length + 1
-            @objects = @fn.apply(null, @inputPoints.concat [@currentPoint])
 
     finalize: ->
-        objects = @fn.apply(null, @inputPoints)
+        objects = [].concat @createdPoints, @fn.apply(null, @inputPoints)
 
-        for object in objects
+        objects.forEach (object) =>
             object.invalidate()
             object.forceCalculate()
             @space.attach(object)
@@ -291,8 +281,20 @@ class ConstructAction
         @tool.done()
 
     anchor: (point) ->
-        @pushPoint (point ? @currentPoint)
+        if not point?
+            @createdPoints.push @currentPoint
+            point = @currentPoint
     
+        @inputPoints.push point
+
+        if @inputs == @inputPoints.length
+            return @finalize()
+        
+        @currentPoint = new FreePoint(undefined, undefined, @space)
+
+        if @inputs == @inputPoints.length + 1
+            @objects = [].concat @fn.apply(null, @inputPoints.concat [@currentPoint]), @createdPoints.concat [@currentPoint]
+
     update: (e) ->
         {x, y} = @space.snapPoint(e)
 
@@ -306,7 +308,7 @@ class ConstructAction
                 Draw.magic ctx, @space, object
         else
             lastPoint = null
-            for point in @inputPoints.concat([@currentPoint])
+            for point in @inputPoints.concat(@currentPoint)
                 if lastPoint?
                     Draw.line ctx, @space, {p1: point, p2: lastPoint}
                 Draw.point ctx, @space, point
@@ -346,10 +348,10 @@ Tools =
             if res == false and @action instanceof MakePointAction then switch
                 when Settings.default_tool.translate(e)
                     @action = new TranslateAction     @space, e
-                when Settings.default_tool.box_select(e) 
-                    @action = new BoxSelectionAction  @space, @action.beginPoint, {keep: Settings.default_tool.helper(e, {mod: true})}
                 when Settings.default_tool.line_select(e)
                     @action = new LineSelectionAction @space, @action.beginPoint, {keep: Settings.default_tool.helper(e, {mod: true})}
+                when Settings.default_tool.box_select(e) 
+                    @action = new BoxSelectionAction  @space, @action.beginPoint, {keep: Settings.default_tool.helper(e, {mod: true})}
             
         mouseup: (e) ->
             return null if not @action

@@ -28,7 +28,9 @@ global.GDLLexer = class Lexer
     @outdebt = 0              # The under-outdentation at the current level.
     @indents = []             # The stack of all current indentation levels.
     @ends    = []             # The stack for pairing up tokens.
-    @tokens  = []             # Stream of parsed tokens in the form `['TYPE', value, line]`.
+
+    @lines   = []
+    @tokens  = []             # Stream of parsed tokens.
 
     # At every position, run through this list of attempted matches,
     # short-circuiting if any of them succeed. Their order determines precedence:

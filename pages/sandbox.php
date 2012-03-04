@@ -5,8 +5,6 @@ set('title', 'Sandbox');
 
 render('./pages/+eplane.php');
 
-asset(-1, 'css', '/web/css/sandbox.css');
-
 asset(0,  'js', '/web/lib/coffee-script.js');
 asset(1,  'js', '/web/lib/jquery.easing.js');
 asset(1,  'js', '/web/lib/jquery.scrollTo-min.js');
@@ -16,7 +14,7 @@ asset(100, 'inline_cf', <<<INLINE
 $ ->
     body = $("body")
     
-    euclides = new EuclidesApp($(".euclides"));
+    euclides = new EuclidesApp($(".eplane"));
 
     resizeCanvas = ->
         fullscreen = body.hasClass("fullscreen")
@@ -45,5 +43,5 @@ INLINE
 );
 ?>
 
-<div class="euclides sandbox">
+<div class="eplane sandbox">
 </div>

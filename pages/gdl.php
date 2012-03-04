@@ -16,5 +16,5 @@ INLINE
 
 <?= render('./pages/_gdl_console.php') ?>
 
-<div class="euclides sandbox">
+<div class="eplane sandbox">
 </div>

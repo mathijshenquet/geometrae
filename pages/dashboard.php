@@ -37,7 +37,7 @@ asset(11, 'js', '/web/js/chapters.js');
 		<p>We weten eigenlijk nog niet zoveel over jou! Vertel ons iets meer en maak je profiel compleet zodat je vrienden je makkelijker kunnen vinden!</p>
 		<dl>
 			<dt>Gebruikersnaam</dt>
-			<dd><?php echo $_SESSION['username'] ?></dd>
+			<dd><?= g('session')->get('username') ?></dd>
 			<dt>Geslacht</dt>
 			<dd>Man</dd>
 			<dt>Uitdagingen</dt>
